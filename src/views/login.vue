@@ -1,7 +1,14 @@
 <template>
   <div class="login">
     <el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">{{ title }}</h3>
+      <div class="login-brand">
+        <img src="@/assets/logo/logo.png" alt="" />
+        <div>
+          <span>OPERATIONS CONSOLE</span>
+          <h1>{{ title }}</h1>
+        </div>
+      </div>
+      <p class="login-intro">使用后台账号进入运营工作台</p>
       <el-form-item prop="username">
         <el-input
           v-model="loginForm.username"
@@ -173,20 +180,22 @@ getCookie()
   justify-content: center;
   align-items: center;
   height: 100%;
-  background-image: url("../assets/images/login-background.jpg");
+  background-image:
+    linear-gradient(rgba(11, 37, 37, 0.58), rgba(11, 37, 37, 0.74)),
+    url("../assets/images/login-background.jpg");
   background-size: cover;
-}
-.title {
-  margin: 0px auto 30px auto;
-  text-align: center;
-  color: #707070;
+  background-position: center;
 }
 
 .login-form {
-  border-radius: 6px;
-  background: #ffffff;
+  border-radius: 8px;
+  border-top: 4px solid #2f7770;
+  background: rgba(255, 255, 255, 0.97);
   width: 400px;
-  padding: 25px 25px 5px 25px;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  padding: 30px 30px 12px;
+  box-shadow: 0 18px 50px rgba(4, 24, 24, 0.28);
   z-index: 1;
   .el-input {
     height: 40px;
@@ -199,6 +208,36 @@ getCookie()
     width: 14px;
     margin-left: 0px;
   }
+}
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  img {
+    width: 42px;
+    height: 42px;
+  }
+
+  span {
+    color: #34746f;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  h1 {
+    margin: 3px 0 0;
+    color: #1c3331;
+    font-size: 21px;
+    font-weight: 650;
+    letter-spacing: 0;
+  }
+}
+.login-intro {
+  margin: 18px 0 22px;
+  color: #77817f;
+  font-size: 13px;
 }
 .login-tip {
   font-size: 13px;
@@ -222,9 +261,9 @@ getCookie()
   width: 100%;
   text-align: center;
   color: #fff;
-  font-family: Arial;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
   font-size: 12px;
-  letter-spacing: 1px;
+  letter-spacing: 0;
 }
 .login-code-img {
   height: 40px;
@@ -232,10 +271,15 @@ getCookie()
 }
 
 html.dark .login {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url("../assets/images/login-background.jpg");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.72)), url("../assets/images/login-background.jpg");
+
   .login-form {
     background: var(--el-bg-color-overlay) !important;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .login-brand h1 {
+    color: var(--el-text-color-primary);
   }
 }
 </style>

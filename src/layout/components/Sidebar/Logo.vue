@@ -87,8 +87,8 @@ const getLogoTextColor = computed(() => {
       color: v-bind(getLogoTextColor);
       font-weight: 600;
       line-height: 50px;
-      font-size: 14px;
-      font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
       vertical-align: middle;
     }
   }
