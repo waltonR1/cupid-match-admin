@@ -177,6 +177,36 @@ export const localizedStatuses = [
   { label: '失败', value: 'failed' }
 ]
 
+export const contactChannelOptions = [
+  { label: '手机', value: 'phone' },
+  { label: '邮箱', value: 'email' },
+  { label: '微信', value: 'wechat' }
+]
+
+export const contactVisibilityOptions = [
+  { label: '介绍成功后开放', value: 'after_introduction' },
+  { label: '仅资料管理者可见', value: 'owner_only' },
+  { label: '暂不开放', value: 'disabled' }
+]
+
+export const ownershipRelationshipOptions = [
+  { label: '本人', value: 'self' },
+  { label: '父亲', value: 'father' },
+  { label: '母亲', value: 'mother' },
+  { label: '亲属', value: 'relative' }
+]
+
+export const ownershipPermissionOptions = [
+  { label: '所有者', value: 'owner' },
+  { label: '管理者', value: 'manager' }
+]
+
+export const ownershipStatusOptions = [
+  { label: '待确认', value: 'pending' },
+  { label: '有效', value: 'active' },
+  { label: '已撤销', value: 'revoked' }
+]
+
 export const localizedFieldLabels: Record<string, string> = {
   profile_name: '资料名称',
   city: '城市',

@@ -94,6 +94,31 @@
         <el-descriptions-item label="更新时间">{{ parseTime(detail.updatedAt) || '-' }}</el-descriptions-item>
       </el-descriptions>
 
+      <el-divider content-position="left">归属与联系</el-divider>
+      <el-descriptions v-if="detail" :column="2" border>
+        <el-descriptions-item label="用户ID">{{ detail.ownerUserId || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="归属关系">{{ labelOf(ownershipRelationshipOptions, detail.relationshipToProfile) }}</el-descriptions-item>
+        <el-descriptions-item label="归属权限">{{ labelOf(ownershipPermissionOptions, detail.ownershipPermission) }}</el-descriptions-item>
+        <el-descriptions-item label="归属状态">{{ labelOf(ownershipStatusOptions, detail.ownershipStatus) }}</el-descriptions-item>
+        <el-descriptions-item label="家庭可见">{{ yesNo(detail.familyVisible) }}</el-descriptions-item>
+        <el-descriptions-item label="最后活跃">{{ parseTime(detail.lastActiveAt) || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="手机">{{ detail.contact?.phone || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="邮箱">{{ detail.contact?.email || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="微信">{{ detail.contact?.wechat || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="首选联系">{{ labelOf(contactChannelOptions, detail.contact?.preferredChannel) }}</el-descriptions-item>
+        <el-descriptions-item label="联系方式开放" :span="2">{{ labelOf(contactVisibilityOptions, detail.contact?.visibility) }}</el-descriptions-item>
+      </el-descriptions>
+
+      <el-divider content-position="left">隐私偏好</el-divider>
+      <el-descriptions v-if="detail" :column="3" border>
+        <el-descriptions-item label="隐藏婚姻">{{ yesNo(detail.privacyPreferences?.hideMaritalStatus) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏子女">{{ yesNo(detail.privacyPreferences?.hideHasChildren) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏子女计划">{{ yesNo(detail.privacyPreferences?.hideChildrenPlan) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏异地">{{ yesNo(detail.privacyPreferences?.hideAcceptsLongDistance) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏吸烟">{{ yesNo(detail.privacyPreferences?.hideSmoking) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏饮酒">{{ yesNo(detail.privacyPreferences?.hideDrinking) }}</el-descriptions-item>
+      </el-descriptions>
+
       <el-divider content-position="left">基础资料</el-divider>
       <el-descriptions v-if="detail" :column="2" border>
         <el-descriptions-item label="性别">{{ labelOf(genders, detail.gender) }}</el-descriptions-item>
@@ -178,6 +203,8 @@ import {
   ageOf,
   childrenPlans,
   communicationStyles,
+  contactChannelOptions,
+  contactVisibilityOptions,
   datingIntentions,
   degreeLevels,
   drinkingOptions,
@@ -186,6 +213,9 @@ import {
   labelsOf,
   languageOptions,
   maritalStatuses,
+  ownershipPermissionOptions,
+  ownershipRelationshipOptions,
+  ownershipStatusOptions,
   petOptions,
   preferredLocationOptions,
   profileStatuses,
