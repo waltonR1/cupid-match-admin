@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="app-container">
     <el-form ref="queryRef" class="library-query-form" :model="queryParams" :inline="true" v-show="showSearch" label-width="70px">
       <el-form-item class="library-query-id" label="资料ID" prop="profileId">
@@ -86,9 +86,9 @@
         <el-descriptions-item label="资料ID" :span="2">{{ detail.profileId }}</el-descriptions-item>
         <el-descriptions-item label="资料名称">{{ localizedFieldValue('profile_name') }}</el-descriptions-item>
         <el-descriptions-item label="用户">{{ detail.ownerAccountName || detail.ownerUserId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="资料类型">{{ labelOf(profileTypes, detail.profileType) }}</el-descriptions-item>
+        <el-descriptions-item label="资料类型">{{ labelOf(profileTypes, detail.profileType, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="资料状态">
-          <el-tag :type="profileStatusType(detail.profileStatus)">{{ labelOf(profileStatuses, detail.profileStatus) }}</el-tag>
+          <el-tag :type="profileStatusType(detail.profileStatus)">{{ labelOf(profileStatuses, detail.profileStatus, activeLocale) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ parseTime(detail.createdAt) || '-' }}</el-descriptions-item>
         <el-descriptions-item label="更新时间">{{ parseTime(detail.updatedAt) || '-' }}</el-descriptions-item>
@@ -97,53 +97,53 @@
       <el-divider content-position="left">归属与联系</el-divider>
       <el-descriptions v-if="detail" :column="2" border>
         <el-descriptions-item label="用户ID">{{ detail.ownerUserId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="归属关系">{{ labelOf(ownershipRelationshipOptions, detail.relationshipToProfile) }}</el-descriptions-item>
-        <el-descriptions-item label="归属权限">{{ labelOf(ownershipPermissionOptions, detail.ownershipPermission) }}</el-descriptions-item>
-        <el-descriptions-item label="归属状态">{{ labelOf(ownershipStatusOptions, detail.ownershipStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="家庭可见">{{ yesNo(detail.familyVisible) }}</el-descriptions-item>
+        <el-descriptions-item label="归属关系">{{ labelOf(ownershipRelationshipOptions, detail.relationshipToProfile, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="归属权限">{{ labelOf(ownershipPermissionOptions, detail.ownershipPermission, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="归属状态">{{ labelOf(ownershipStatusOptions, detail.ownershipStatus, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="家庭可见">{{ yesNo(detail.familyVisible, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="最后活跃">{{ parseTime(detail.lastActiveAt) || '-' }}</el-descriptions-item>
         <el-descriptions-item label="手机">{{ detail.contact?.phone || '-' }}</el-descriptions-item>
         <el-descriptions-item label="邮箱">{{ detail.contact?.email || '-' }}</el-descriptions-item>
         <el-descriptions-item label="微信">{{ detail.contact?.wechat || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="首选联系">{{ labelOf(contactChannelOptions, detail.contact?.preferredChannel) }}</el-descriptions-item>
-        <el-descriptions-item label="联系方式开放" :span="2">{{ labelOf(contactVisibilityOptions, detail.contact?.visibility) }}</el-descriptions-item>
+        <el-descriptions-item label="首选联系">{{ labelOf(contactChannelOptions, detail.contact?.preferredChannel, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="联系方式开放" :span="2">{{ labelOf(contactVisibilityOptions, detail.contact?.visibility, activeLocale) }}</el-descriptions-item>
       </el-descriptions>
 
       <el-divider content-position="left">隐私偏好</el-divider>
       <el-descriptions v-if="detail" :column="3" border>
-        <el-descriptions-item label="隐藏婚姻">{{ yesNo(detail.privacyPreferences?.hideMaritalStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="隐藏子女">{{ yesNo(detail.privacyPreferences?.hideHasChildren) }}</el-descriptions-item>
-        <el-descriptions-item label="隐藏子女计划">{{ yesNo(detail.privacyPreferences?.hideChildrenPlan) }}</el-descriptions-item>
-        <el-descriptions-item label="隐藏异地">{{ yesNo(detail.privacyPreferences?.hideAcceptsLongDistance) }}</el-descriptions-item>
-        <el-descriptions-item label="隐藏吸烟">{{ yesNo(detail.privacyPreferences?.hideSmoking) }}</el-descriptions-item>
-        <el-descriptions-item label="隐藏饮酒">{{ yesNo(detail.privacyPreferences?.hideDrinking) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏婚姻">{{ yesNo(detail.privacyPreferences?.hideMaritalStatus, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏子女">{{ yesNo(detail.privacyPreferences?.hideHasChildren, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏子女计划">{{ yesNo(detail.privacyPreferences?.hideChildrenPlan, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏异地">{{ yesNo(detail.privacyPreferences?.hideAcceptsLongDistance, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏吸烟">{{ yesNo(detail.privacyPreferences?.hideSmoking, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="隐藏饮酒">{{ yesNo(detail.privacyPreferences?.hideDrinking, activeLocale) }}</el-descriptions-item>
       </el-descriptions>
 
       <el-divider content-position="left">基础资料</el-divider>
       <el-descriptions v-if="detail" :column="2" border>
-        <el-descriptions-item label="性别">{{ labelOf(genders, detail.gender) }}</el-descriptions-item>
+        <el-descriptions-item label="性别">{{ labelOf(genders, detail.gender, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="年龄">{{ ageOf(detail.birthYear) }}</el-descriptions-item>
         <el-descriptions-item label="身高">{{ detail.height ? `${detail.height} cm` : '-' }}</el-descriptions-item>
-        <el-descriptions-item label="国家">{{ localizedFieldValue('country', detail.countryCode) }}</el-descriptions-item>
-        <el-descriptions-item label="城市">{{ localizedFieldValue('city', detail.cityCode) }}</el-descriptions-item>
-        <el-descriptions-item label="国籍">{{ localizedFieldValue('nationality', detail.nationalityCode) }}</el-descriptions-item>
-        <el-descriptions-item label="学历">{{ localizedFieldValue('education', detail.educationCode) }} / {{ labelOf(degreeLevels, detail.degreeLevel) }}</el-descriptions-item>
-        <el-descriptions-item label="行业">{{ localizedFieldValue('industry', detail.industryCode) }}</el-descriptions-item>
+        <el-descriptions-item label="国家">{{ localizedFieldValue('country', profileCodeLabel('country', detail.countryCode)) }}</el-descriptions-item>
+        <el-descriptions-item label="城市">{{ localizedFieldValue('city', profileCodeLabel('city', detail.cityCode)) }}</el-descriptions-item>
+        <el-descriptions-item label="国籍">{{ localizedFieldValue('nationality', profileCodeLabel('nationality', detail.nationalityCode)) }}</el-descriptions-item>
+        <el-descriptions-item label="学历">{{ localizedFieldValue('education', profileCodeLabel('education', detail.educationCode)) }} / {{ labelOf(degreeLevels, detail.degreeLevel, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="行业">{{ localizedFieldValue('industry', profileCodeLabel('industry', detail.industryCode)) }}</el-descriptions-item>
         <el-descriptions-item label="职业方向">{{ localizedFieldValue('career_direction') }}</el-descriptions-item>
-        <el-descriptions-item label="语言" :span="2">{{ labelsOf(languageOptions, detail.languages) }}</el-descriptions-item>
+        <el-descriptions-item label="语言" :span="2">{{ labelsOf(languageOptions, detail.languages, activeLocale) }}</el-descriptions-item>
       </el-descriptions>
 
       <el-divider content-position="left">婚恋与偏好</el-divider>
       <el-descriptions v-if="detail" :column="2" border>
-        <el-descriptions-item label="婚姻">{{ labelOf(maritalStatuses, detail.maritalStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="子女">{{ yesNo(detail.hasChildren) }} / {{ labelOf(childrenPlans, detail.childrenPlan) }}</el-descriptions-item>
-        <el-descriptions-item label="交友意向">{{ labelOf(datingIntentions, detail.datingIntentionCode) }}</el-descriptions-item>
-        <el-descriptions-item label="异地">{{ yesNo(detail.acceptsLongDistance) }}</el-descriptions-item>
+        <el-descriptions-item label="婚姻">{{ labelOf(maritalStatuses, detail.maritalStatus, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="子女">{{ yesNo(detail.hasChildren, activeLocale) }} / {{ labelOf(childrenPlans, detail.childrenPlan, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="交友意向">{{ labelOf(datingIntentions, detail.datingIntentionCode, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="异地">{{ yesNo(detail.acceptsLongDistance, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="关系目标">{{ localizedFieldValue('relationship_goal') }}</el-descriptions-item>
-        <el-descriptions-item label="迁居">{{ labelOf(relocationOptions, detail.relocation) }}</el-descriptions-item>
-        <el-descriptions-item label="关系价值观" :span="2">{{ labelsOf(relationshipValueOptions, detail.relationshipValues) }}</el-descriptions-item>
+        <el-descriptions-item label="迁居">{{ labelOf(relocationOptions, detail.relocation, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="关系价值观" :span="2">{{ labelsOf(relationshipValueOptions, detail.relationshipValues, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="期望年龄">{{ preferredAgeRange(detail) }}</el-descriptions-item>
-        <el-descriptions-item label="期望地区">{{ labelOf(preferredLocationOptions, detail.preferredLocation) }}</el-descriptions-item>
+        <el-descriptions-item label="期望地区">{{ labelOf(preferredLocationOptions, detail.preferredLocation, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="期望学历">{{ localizedFieldValue('preferred_education') }}</el-descriptions-item>
         <el-descriptions-item label="居住计划">{{ localizedFieldValue('residence_plan') }}</el-descriptions-item>
         <el-descriptions-item label="不可接受项" :span="2">{{ localizedItemValue('deal_breakers') }}</el-descriptions-item>
@@ -151,13 +151,13 @@
 
       <el-divider content-position="left">生活方式</el-divider>
       <el-descriptions v-if="detail" :column="2" border>
-        <el-descriptions-item label="吸烟">{{ labelOf(smokingOptions, detail.smoking) }}</el-descriptions-item>
-        <el-descriptions-item label="饮酒">{{ labelOf(drinkingOptions, detail.drinking) }}</el-descriptions-item>
+        <el-descriptions-item label="吸烟">{{ labelOf(smokingOptions, detail.smoking, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="饮酒">{{ labelOf(drinkingOptions, detail.drinking, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="运动">{{ localizedFieldValue('exercise') }}</el-descriptions-item>
-        <el-descriptions-item label="活跃度">{{ labelOf(activityLevels, detail.activityLevel) }}</el-descriptions-item>
-        <el-descriptions-item label="周末方式">{{ labelOf(weekendStyles, detail.weekendStyle) }}</el-descriptions-item>
-        <el-descriptions-item label="宠物">{{ labelOf(petOptions, detail.pets) }}</el-descriptions-item>
-        <el-descriptions-item label="沟通方式">{{ labelOf(communicationStyles, detail.communicationStyle) }}</el-descriptions-item>
+        <el-descriptions-item label="活跃度">{{ labelOf(activityLevels, detail.activityLevel, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="周末方式">{{ labelOf(weekendStyles, detail.weekendStyle, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="宠物">{{ labelOf(petOptions, detail.pets, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="沟通方式">{{ labelOf(communicationStyles, detail.communicationStyle, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="家庭生活">{{ localizedFieldValue('family_life') }}</el-descriptions-item>
         <el-descriptions-item label="性格特质" :span="2">{{ localizedItemValue('personality_traits') }}</el-descriptions-item>
         <el-descriptions-item label="兴趣" :span="2">{{ localizedItemValue('interests') }}</el-descriptions-item>
@@ -187,7 +187,7 @@
         </el-descriptions-item>
         <el-descriptions-item label="运营更新">{{ parseTime(detail.internalRecord?.updatedAt) || '-' }}</el-descriptions-item>
         <el-descriptions-item label="更新人">{{ detail.internalRecord?.internalUpdatedByUserId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="记录来源">{{ detail.internalRecord?.source || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="记录来源">{{ labelOf(internalRecordSourceOptions, detail.internalRecord?.source, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="雇主信息">{{ internalFieldValue('employer') }}</el-descriptions-item>
         <el-descriptions-item label="收入范围">{{ internalFieldValue('income_range') }}</el-descriptions-item>
         <el-descriptions-item label="内部备注" :span="2">{{ internalFieldValue('staff_notes') }}</el-descriptions-item>
@@ -209,6 +209,7 @@ import {
   degreeLevels,
   drinkingOptions,
   genders,
+  internalRecordSourceOptions,
   labelOf,
   labelsOf,
   languageOptions,
@@ -218,6 +219,7 @@ import {
   ownershipStatusOptions,
   petOptions,
   preferredLocationOptions,
+  profileCodeLabel,
   profileStatuses,
   profileSummary,
   profileTitle,
@@ -412,3 +414,4 @@ getList()
   border: 1px solid var(--el-border-color-lighter);
 }
 </style>
+
