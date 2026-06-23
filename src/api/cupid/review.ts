@@ -41,3 +41,11 @@ export function getVerification(materialId: string): Promise<AjaxResult> {
 export function reviewVerification(materialId: string, data: ReviewPayload): Promise<AjaxResult> {
   return request({ url: `/cupid/verification/${materialId}/review`, method: 'post', data })
 }
+
+export function previewVerificationMaterial(materialId: string): Promise<Blob> {
+  return request({ url: `/cupid/verification/${materialId}/material/preview`, method: 'get', responseType: 'blob' })
+}
+
+export function downloadVerificationMaterial(materialId: string): Promise<Blob> {
+  return request({ url: `/cupid/verification/${materialId}/material/download`, method: 'get', responseType: 'blob' })
+}

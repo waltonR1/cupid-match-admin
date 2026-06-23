@@ -89,8 +89,15 @@
         <el-descriptions-item v-if="detail.materialType === 'identity'" label="出生日期">{{ parseTime(detail.dateOfBirth, '{y}-{m}-{d}') || '-' }}</el-descriptions-item>
         <el-descriptions-item label="材料名称">{{ detail.materialName || '-' }}</el-descriptions-item>
         <el-descriptions-item label="材料凭证">
-          <div>{{ materialReference(detail) }}</div>
-          <div v-if="detail.materialUrl" class="muted">敏感材料不直接打开裸链，后续接入鉴权预览接口。</div>
+          <div class="material-line">
+            <span
+              :class="['material-reference', detail.materialUrl ? 'is-clickable' : '']"
+              @click="previewMaterial"
+            >
+              {{ materialReference(detail) }}
+            </span>
+            <el-button link type="primary" icon="Download" @click="downloadMaterialFile" v-hasPermi="['cupid:verification:material:download']">下载</el-button>
+          </div>
         </el-descriptions-item>
         <el-descriptions-item label="提交说明">{{ detail.reviewNote || '-' }}</el-descriptions-item>
         <el-descriptions-item label="提交时间">{{ parseTime(detail.submittedAt) || '-' }}</el-descriptions-item>
@@ -122,11 +129,17 @@
         <el-button type="primary" :disabled="!canReviewVerification(reviewTarget)" @click="submitReview">确定</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="materialPreviewOpen" title="材料预览" width="760px" append-to-body @closed="clearMaterialPreview">
+      <img v-if="isImagePreview" :src="materialPreviewUrl" class="material-preview-image" alt="材料预览" />
+      <iframe v-else :src="materialPreviewUrl" class="material-preview-frame" title="材料预览" />
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getVerification, listVerifications, reviewVerification } from '@/api/cupid/review'
+import { saveAs } from 'file-saver'
+import { downloadVerificationMaterial, getVerification, listVerifications, previewVerificationMaterial, reviewVerification } from '@/api/cupid/review'
 import { parseTime } from '@/utils/ruoyi'
 import {
   adminReviewSortOptions,
@@ -150,6 +163,9 @@ const total = ref(0)
 const dateRange = ref<string[]>([])
 const detailOpen = ref(false)
 const detail = ref<any>(null)
+const materialPreviewOpen = ref(false)
+const materialPreviewUrl = ref('')
+const materialPreviewType = ref('')
 const reviewOpen = ref(false)
 const reviewTarget = ref<any>(null)
 const reviewForm = reactive({ status: 'approved' as 'approved' | 'rejected', reason: '' })
@@ -186,10 +202,40 @@ function materialSummary(row: any): string {
 }
 
 function materialReference(row: any): string {
-  if (!row?.materialUrl) {
-    return '-'
+  return row?.materialName || materialFilename(row) || '-'
+}
+
+function materialFilename(row: any): string {
+  return row?.materialName || String(row?.materialUrl || 'verification-material').split('/').pop() || 'verification-material'
+}
+
+const isImagePreview = computed(() => materialPreviewType.value.startsWith('image/'))
+
+async function previewMaterial(): Promise<void> {
+  if (!detail.value?.materialId || !detail.value?.materialUrl) return
+  try {
+    clearMaterialPreview()
+    const blob = await previewVerificationMaterial(detail.value.materialId)
+    materialPreviewType.value = blob.type || ''
+    materialPreviewUrl.value = URL.createObjectURL(blob)
+    materialPreviewOpen.value = true
+  } catch {
+    proxy.$modal.msgError('材料预览失败')
   }
-  return String(row.materialUrl).replace(/^private:\/\//, '私有对象：')
+}
+
+function clearMaterialPreview(): void {
+  if (materialPreviewUrl.value) {
+    URL.revokeObjectURL(materialPreviewUrl.value)
+  }
+  materialPreviewUrl.value = ''
+  materialPreviewType.value = ''
+}
+
+async function downloadMaterialFile(): Promise<void> {
+  if (!detail.value?.materialId) return
+  const blob = await downloadVerificationMaterial(detail.value.materialId)
+  saveAs(blob, materialFilename(detail.value))
 }
 
 function getList(): void {
@@ -349,5 +395,37 @@ getList()
   color: var(--el-text-color-secondary);
   font-size: 12px;
   line-height: 18px;
+}
+.material-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.material-line :deep(.el-button) {
+  flex: 0 0 auto;
+  margin-left: 0;
+  padding: 0;
+}
+.material-reference {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.material-reference.is-clickable {
+  color: var(--el-color-primary);
+  cursor: pointer;
+}
+.material-preview-image {
+  display: block;
+  max-width: 100%;
+  max-height: 72vh;
+  margin: 0 auto;
+}
+.material-preview-frame {
+  width: 100%;
+  height: 72vh;
+  border: 0;
 }
 </style>
