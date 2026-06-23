@@ -75,10 +75,14 @@
       </el-table-column>
       <el-table-column label="操作" width="170" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" icon="View" @click="openDetail(row.profileId)" v-hasPermi="['cupid:profile:query']">详情</el-button>
-          <el-button link type="primary" icon="CircleCheck" :disabled="!canReviewProfile(row)" @click="openReview(row)" v-hasPermi="['cupid:profile:review']">
-            {{ canReviewProfile(row) ? '审核' : '已处理' }}
-          </el-button>
+          <div class="profile-actions">
+            <el-button link type="primary" icon="View" @click="openDetail(row.profileId)" v-hasPermi="['cupid:profile:query']">详情</el-button>
+            <el-button v-if="canReviewProfile(row)" link type="primary" icon="CircleCheck" @click="openReview(row)" v-hasPermi="['cupid:profile:review']">
+              审核
+            </el-button>
+            <span v-else-if="row.profileStatus === 'draft'" class="muted-action">-</span>
+            <span v-else class="muted-action">已处理</span>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -193,8 +197,13 @@
             <el-radio value="rejected">拒绝并隐藏</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="原因">
-          <el-input v-model="reviewForm.reason" type="textarea" maxlength="500" show-word-limit :rows="4" placeholder="请输入审核原因" />
+        <el-form-item v-if="reviewForm.status === 'rejected'" label="拒绝原因">
+          <el-select v-model="rejectReason" placeholder="选择快捷原因" clearable style="width: 100%" @change="applyRejectReason">
+            <el-option v-for="item in profileRejectReasons" :key="item" :label="item" :value="item" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="审核意见">
+          <el-input v-model="reviewForm.reason" type="textarea" maxlength="500" show-word-limit :rows="4" placeholder="请输入审核意见" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -253,6 +262,15 @@ const activeLocale = ref('zh')
 const reviewOpen = ref(false)
 const reviewTarget = ref<any>(null)
 const reviewForm = reactive({ status: 'approved' as 'approved' | 'rejected', reason: '' })
+const rejectReason = ref('')
+const profileRejectReasons = [
+  '资料信息不完整，请补充关键字段',
+  '资料内容与认证信息不一致',
+  '简介或标签包含不适合公开展示的内容',
+  '照片或资料质量不足，暂不适合开放',
+  '疑似虚假资料或信息无法确认',
+  '其他'
+]
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
@@ -261,7 +279,7 @@ const queryParams = reactive({
   userId: '',
   userKeyword: '',
   profileType: '',
-  profileStatus: '',
+  profileStatus: 'review',
   sortBy: 'reviewFirst'
 })
 
@@ -405,7 +423,14 @@ function openReview(row: any): void {
   reviewTarget.value = row
   reviewForm.status = 'approved'
   reviewForm.reason = ''
+  rejectReason.value = ''
   reviewOpen.value = true
+}
+
+function applyRejectReason(value: string): void {
+  if (value && !reviewForm.reason) {
+    reviewForm.reason = value
+  }
 }
 
 function submitReview(): void {
@@ -503,10 +528,24 @@ getList()
 .profile-locale-tabs :deep(.el-tabs__header) {
   margin-bottom: 6px;
 }
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+}
+.profile-actions :deep(.el-button) {
+  margin-left: 0;
+  padding: 0;
+}
 .muted {
   color: var(--el-text-color-secondary);
   font-size: 12px;
   line-height: 18px;
+}
+.muted-action {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
 }
 .mt12 {
   margin-top: 12px;

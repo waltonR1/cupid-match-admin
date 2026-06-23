@@ -34,10 +34,10 @@ export function listVerifications(query: Record<string, any>): Promise<TableData
   return request({ url: '/cupid/verification/list', method: 'get', params: query })
 }
 
-export function getVerification(profileId: string): Promise<AjaxResult> {
-  return request({ url: `/cupid/verification/${profileId}`, method: 'get' })
+export function getVerification(materialId: string): Promise<AjaxResult> {
+  return request({ url: `/cupid/verification/${materialId}`, method: 'get' })
 }
 
-export function reviewVerification(profileId: string, data: ReviewPayload): Promise<AjaxResult> {
-  return request({ url: `/cupid/verification/${profileId}/review`, method: 'post', data })
+export function reviewVerification(materialId: string, data: ReviewPayload): Promise<AjaxResult> {
+  return request({ url: `/cupid/verification/${materialId}/review`, method: 'post', data })
 }

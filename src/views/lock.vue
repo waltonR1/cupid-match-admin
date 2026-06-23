@@ -55,7 +55,16 @@ const particleCanvas = ref<HTMLCanvasElement | null>(null)
 
 let timer: any = null
 let animationId: any  = null
-let particles: any = []
+interface Particle {
+  x: number
+  y: number
+  r: number
+  dx: number
+  dy: number
+  alpha: number
+}
+
+let particles: Particle[] = []
 
 const onAvatarError = (e: Event) => {
   (e.target as HTMLImageElement).src = defAva

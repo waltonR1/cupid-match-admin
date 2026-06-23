@@ -9,7 +9,7 @@ export interface InternalLocalizedField {
 
 export interface ProfileInternalPayload {
   isFeatured?: boolean | number
-  localizedFields: InternalLocalizedField[]
+  localizedFields?: InternalLocalizedField[]
 }
 
 export interface ProfileNotesPayload {

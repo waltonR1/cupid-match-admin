@@ -244,6 +244,7 @@ import {
   updateProfileManageNotes
 } from '@/api/cupid/profile-manage'
 import { checkPermi } from '@/utils/permission'
+import { parseTime } from '@/utils/ruoyi'
 import {
   activityLevels,
   ageOf,
@@ -275,7 +276,10 @@ import {
   yesNo
 } from '../review-utils'
 
-const { proxy } = getCurrentInstance()
+type ReviewLocale = 'zh' | 'fr' | 'en'
+type LocalizedTextMap = Record<ReviewLocale, string>
+
+const proxy = getCurrentInstance()!.proxy as any
 const showSearch = ref(true)
 const loading = ref(false)
 const rows = ref<any[]>([])
@@ -283,8 +287,8 @@ const total = ref(0)
 const dateRange = ref<string[]>([])
 const detailOpen = ref(false)
 const detail = ref<any>(null)
-const activeLocale = ref('zh')
-const notesLocale = ref('zh')
+const activeLocale = ref<ReviewLocale>('zh')
+const notesLocale = ref<ReviewLocale>('zh')
 const notesLoaded = ref(false)
 const internalSaving = ref(false)
 const canEditInternal = computed(() => checkPermi(['cupid:profileManage:edit']))
@@ -306,10 +310,10 @@ const internalForm = reactive({
 })
 const notesForm = reactive({
   fields: {
-    staff_notes: { zh: '', fr: '', en: '' }
+    staff_notes: { zh: '', fr: '', en: '' } as LocalizedTextMap
   }
 })
-const localeTabs = [
+const localeTabs: Array<{ label: string; value: ReviewLocale }> = [
   { label: '中文', value: 'zh' },
   { label: 'Français', value: 'fr' },
   { label: 'English', value: 'en' }
@@ -379,8 +383,9 @@ function loadNotes(): void {
   getProfileManageNotes(detail.value.profileId).then((res) => {
     clearNotesForm()
     ;(res.data || []).forEach((item: any) => {
-      if (item.fieldName === 'staff_notes' && notesForm.fields.staff_notes[item.locale] !== undefined) {
-        notesForm.fields.staff_notes[item.locale] = item.value || ''
+      const locale = item.locale as ReviewLocale
+      if (item.fieldName === 'staff_notes' && notesForm.fields.staff_notes[locale] !== undefined) {
+        notesForm.fields.staff_notes[locale] = item.value || ''
       }
     })
     notesLoaded.value = true

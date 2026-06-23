@@ -32,6 +32,19 @@ export const materialStatuses = [
   { label: '已拒绝', value: 'rejected' }
 ]
 
+export const verificationMaterialTypes = [
+  { label: '身份认证', value: 'identity' },
+  { label: '学历认证', value: 'education' },
+  { label: '收入认证', value: 'income' },
+  { label: '婚姻认证', value: 'marital' }
+]
+
+export const verificationMaterialStatuses = [
+  { label: '待审核', value: 'pending' },
+  { label: '已通过', value: 'approved' },
+  { label: '已拒绝', value: 'rejected' }
+]
+
 export const adminReviewSortOptions = [
   { label: '待审核优先', value: 'reviewFirst' },
   { label: '更新时间最新', value: 'updatedDesc' },
@@ -433,5 +446,5 @@ export function canReviewPhoto(row: any): boolean {
 }
 
 export function canReviewVerification(row: any): boolean {
-  return row?.reviewStatus === 'pending'
+  return row?.status === 'pending'
 }
