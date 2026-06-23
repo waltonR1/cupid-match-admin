@@ -6,6 +6,12 @@ export interface ReviewPayload {
   reason: string
 }
 
+export interface VerificationResetPayload {
+  profileId: string
+  materialType: string
+  reason: string
+}
+
 export function listProfiles(query: Record<string, any>): Promise<TableDataInfo<any[]>> {
   return request({ url: '/cupid/profile/list', method: 'get', params: query })
 }
@@ -48,4 +54,20 @@ export function previewVerificationMaterial(materialId: string): Promise<Blob> {
 
 export function downloadVerificationMaterial(materialId: string): Promise<Blob> {
   return request({ url: `/cupid/verification/${materialId}/material/download`, method: 'get', responseType: 'blob' })
+}
+
+export function createAdminVerificationMaterial(data: Record<string, string>, file: File): Promise<AjaxResult> {
+  const formData = new FormData()
+  Object.entries(data).forEach(([key, value]) => formData.append(key, value ?? ''))
+  formData.append('file', file)
+  return request({
+    url: '/cupid/verification/material/create',
+    method: 'post',
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+export function resetVerification(data: VerificationResetPayload): Promise<AjaxResult> {
+  return request({ url: '/cupid/verification/reset', method: 'post', data })
 }
