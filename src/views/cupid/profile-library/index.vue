@@ -15,12 +15,12 @@
       </el-form-item>
       <el-form-item class="library-query-select" label="类型" prop="profileType">
         <el-select v-model="queryParams.profileType" placeholder="资料类型" clearable>
-          <el-option v-for="item in profileTypes" :key="item.value" :label="item.label" :value="item.value" />
+          <el-option v-for="item in optionsOf(profileTypes, activeLocale)" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item class="library-query-select" label="状态" prop="profileStatus">
         <el-select v-model="queryParams.profileStatus" placeholder="资料状态" clearable>
-          <el-option v-for="item in profileStatuses" :key="item.value" :label="item.label" :value="item.value" />
+          <el-option v-for="item in optionsOf(profileStatuses, activeLocale)" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item class="library-query-select library-query-sort" label="排序" prop="sortBy">
@@ -221,6 +221,7 @@ import {
   petOptions,
   preferredLocationOptions,
   profileCodeLabel,
+  optionsOf,
   profileStatuses,
   profileSummary,
   profileTitle,

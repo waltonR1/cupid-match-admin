@@ -15,7 +15,7 @@
       </el-form-item>
       <el-form-item class="review-query-select" label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="材料状态" clearable>
-          <el-option v-for="item in verificationMaterialStatuses" :key="item.value" :label="item.label" :value="item.value" />
+          <el-option v-for="item in optionsOf(verificationMaterialStatuses, activeLocale)" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item class="review-query-sort" label="排序" prop="sortBy">
@@ -213,6 +213,7 @@ import {
   labelOf,
   profileSummary,
   profileTitle,
+  optionsOf,
   verificationMaterialStatuses,
   verificationMaterialTypes
 } from '../../review-utils'

@@ -21,7 +21,7 @@
       </el-form-item>
       <el-form-item class="photo-query-select" label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="照片状态" clearable>
-          <el-option v-for="item in photoStatuses" :key="item.value" :label="item.label" :value="item.value" />
+          <el-option v-for="item in optionsOf(photoStatuses, activeLocale)" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item class="photo-query-select photo-query-sort" label="排序" prop="sortBy">
@@ -143,6 +143,7 @@ import {
   adminReviewSortOptions,
   canReviewPhoto,
   labelOf,
+  optionsOf,
   photoStatuses,
   profileSummary,
   profileTitle

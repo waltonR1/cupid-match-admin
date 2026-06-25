@@ -15,7 +15,7 @@
       </el-form-item>
       <el-form-item class="manage-query-select" label="类型" prop="profileType">
         <el-select v-model="queryParams.profileType" placeholder="资料类型" clearable>
-          <el-option v-for="item in profileTypes" :key="item.value" :label="item.label" :value="item.value" />
+          <el-option v-for="item in optionsOf(profileTypes, activeLocale)" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item class="manage-query-select" label="精选" prop="featured">
@@ -263,6 +263,7 @@ import {
   ownershipPermissionOptions,
   ownershipRelationshipOptions,
   ownershipStatusOptions,
+  optionsOf,
   petOptions,
   preferredLocationOptions,
   profileCodeLabel,
