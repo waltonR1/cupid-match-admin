@@ -197,6 +197,7 @@
 </template>
 
 <script setup lang="ts">
+import { parseTime } from '@/utils/ruoyi'
 import { getProfileLibrary, listProfileLibrary } from '@/api/cupid/profile-library'
 import {
   activityLevels,
@@ -231,7 +232,7 @@ import {
   yesNo
 } from '../review-utils'
 
-const { proxy } = getCurrentInstance()
+const proxy = getCurrentInstance()!.proxy as any
 const showSearch = ref(true)
 const loading = ref(false)
 const rows = ref<any[]>([])

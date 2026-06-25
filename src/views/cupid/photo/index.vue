@@ -137,6 +137,7 @@
 </template>
 
 <script setup lang="ts">
+import { parseTime } from '@/utils/ruoyi'
 import { getPhoto, listPhotos, reviewPhoto } from '@/api/cupid/review'
 import {
   adminReviewSortOptions,
@@ -147,7 +148,7 @@ import {
   profileTitle
 } from '../review-utils'
 
-const { proxy } = getCurrentInstance()
+const proxy = getCurrentInstance()!.proxy as any
 const route = useRoute()
 const showSearch = ref(true)
 const loading = ref(false)

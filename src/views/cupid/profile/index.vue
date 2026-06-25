@@ -215,6 +215,7 @@
 </template>
 
 <script setup lang="ts">
+import { parseTime } from '@/utils/ruoyi'
 import { getProfile, listProfiles, reviewProfile } from '@/api/cupid/review'
 import {
   adminReviewSortOptions,
@@ -249,7 +250,7 @@ import {
   yesNo
 } from '../review-utils'
 
-const { proxy } = getCurrentInstance()
+const proxy = getCurrentInstance()!.proxy as any
 const router = useRouter()
 const showSearch = ref(true)
 const loading = ref(false)

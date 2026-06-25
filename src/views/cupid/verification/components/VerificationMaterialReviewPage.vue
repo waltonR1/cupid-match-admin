@@ -204,7 +204,7 @@
 
 <script setup lang="ts">
 import { saveAs } from 'file-saver'
-import type { UploadFile, UploadUserFile } from 'element-plus'
+import type { UploadFile as ElUploadFile, UploadUserFile as ElUploadUserFile } from 'element-plus/es/components/upload/src/upload'
 import { createAdminVerificationMaterial, downloadVerificationMaterial, getVerification, listVerifications, previewVerificationMaterial, resetVerification, reviewVerification } from '@/api/cupid/review'
 import { parseTime } from '@/utils/ruoyi'
 import {
@@ -238,7 +238,7 @@ const reviewForm = reactive({ status: 'approved' as 'approved' | 'rejected', rea
 const rejectReason = ref('')
 const createOpen = ref(false)
 const createForm = reactive({ profileId: '', materialName: '', legalName: '', dateOfBirth: '', reviewNote: '' })
-const createFileList = ref<UploadUserFile[]>([])
+const createFileList = ref<ElUploadUserFile[]>([])
 const createFile = ref<File | null>(null)
 const resetOpen = ref(false)
 const resetForm = reactive({ profileId: '', reason: '' })
@@ -338,7 +338,7 @@ function openCreateMaterial(): void {
   createOpen.value = true
 }
 
-function handleCreateFileChange(uploadFile: UploadFile): void {
+function handleCreateFileChange(uploadFile: ElUploadFile): void {
   createFile.value = uploadFile.raw || null
   if (!createForm.materialName.trim() && uploadFile.name) {
     createForm.materialName = uploadFile.name
