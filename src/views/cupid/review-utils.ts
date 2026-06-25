@@ -1,3 +1,9 @@
+import useCupidOptionsStore from '@/store/modules/cupidOptions'
+
+export type ReviewLocale = 'zh' | 'fr' | 'en'
+
+type OptionItem = { label: string; value: string }
+
 export const profileTypes = [
   { label: '本人资料', value: 'self' },
   { label: '家庭代建', value: 'family' }
@@ -31,6 +37,8 @@ export const materialStatuses = [
   { label: '已认证', value: 'verified' },
   { label: '已拒绝', value: 'rejected' }
 ]
+
+export const verificationStatuses = materialStatuses
 
 export const verificationMaterialTypes = [
   { label: '身份认证', value: 'identity' },
@@ -157,8 +165,6 @@ export const languageOptions = [
   { label: '德文', value: 'de' }
 ]
 
-export const profileCodeLabels: Record<string, Record<string, string>> = {}
-
 export const localizedStatuses = [
   { label: '待处理', value: 'pending' },
   { label: '已完成', value: 'ready' },
@@ -174,7 +180,7 @@ export const contactChannelOptions = [
 
 export const contactVisibilityOptions = [
   { label: '介绍成功后开放', value: 'after_introduction' },
-  { label: '仅管理者可见', value: 'owner_only' },
+  { label: '仅管理员可见', value: 'owner_only' },
   { label: '暂不开放', value: 'disabled' }
 ]
 
@@ -203,142 +209,60 @@ export const internalRecordSourceOptions = [
   { label: '员工采集', value: 'staff_collected' }
 ]
 
-type ReviewLocale = 'zh' | 'fr' | 'en'
-
-const optionLocaleLabels = new Map<Array<{ label: string; value: string }>, Record<string, Partial<Record<ReviewLocale, string>>>>([
-  [profileTypes, {
-    self: { fr: 'Profil personnel', en: 'Self profile' },
-    family: { fr: 'Profil familial', en: 'Family profile' }
-  }],
-  [profileStatuses, {
-    draft: { fr: 'Brouillon', en: 'Draft' },
-    review: { fr: 'En cours', en: 'In review' },
-    open: { fr: 'Ouvert', en: 'Open' },
-    paused: { fr: 'En pause', en: 'Paused' },
-    hidden: { fr: 'Cache', en: 'Hidden' }
-  }],
-  [genders, {
-    male: { fr: 'Homme', en: 'Male' },
-    female: { fr: 'Femme', en: 'Female' }
-  }],
-  [degreeLevels, {
-    bachelor: { fr: 'Licence', en: 'Bachelor' },
-    master: { fr: 'Master', en: 'Master' },
-    phd: { fr: 'Doctorat', en: 'PhD' }
-  }],
-  [maritalStatuses, {
-    never_married: { fr: 'Jamais marie', en: 'Never married' },
-    divorced: { fr: 'Divorce', en: 'Divorced' },
-    widowed: { fr: 'Veuf', en: 'Widowed' }
-  }],
-  [childrenPlans, {
-    wants: { fr: 'Souhaite des enfants', en: 'Wants children' },
-    open_to_discuss: { fr: 'Ouvert a la discussion', en: 'Open to discuss' },
-    does_not_want: { fr: 'Ne souhaite pas d enfants', en: 'Does not want children' }
-  }],
-  [datingIntentions, {
-    serious: { fr: 'Relation serieuse', en: 'Serious relationship' },
-    marriage: { fr: 'Projet de mariage', en: 'Marriage minded' },
-    exclusive: { fr: 'Relation exclusive', en: 'Exclusive relationship' },
-    cross_border: { fr: 'Ouvert a l international', en: 'Open to cross-border' }
-  }],
-  [relocationOptions, {
-    willing: { fr: 'Volontaire', en: 'Willing' },
-    unwilling: { fr: 'Non volontaire', en: 'Unwilling' },
-    open_to_discuss: { fr: 'Ouvert a la discussion', en: 'Open to discuss' }
-  }],
-  [smokingOptions, {
-    never: { fr: 'Jamais', en: 'Never' },
-    social: { fr: 'En societe', en: 'Socially' },
-    often: { fr: 'Souvent', en: 'Often' }
-  }],
-  [drinkingOptions, {
-    never: { fr: 'Jamais', en: 'Never' },
-    social: { fr: 'En societe', en: 'Socially' },
-    often: { fr: 'Souvent', en: 'Often' }
-  }],
-  [activityLevels, {
-    low: { fr: 'Faible', en: 'Low' },
-    moderate: { fr: 'Modere', en: 'Moderate' },
-    high: { fr: 'Eleve', en: 'High' }
-  }],
-  [weekendStyles, {
-    outdoors: { fr: 'En exterieur', en: 'Outdoors' },
-    indoors: { fr: 'En interieur', en: 'Indoors' },
-    social: { fr: 'Social', en: 'Social' },
-    flexible: { fr: 'Flexible', en: 'Flexible' }
-  }],
-  [petOptions, {
-    has: { fr: 'A des animaux', en: 'Has pets' },
-    none: { fr: 'Pas d animaux', en: 'No pets' },
-    likes: { fr: 'Aime les animaux', en: 'Likes pets' }
-  }],
-  [communicationStyles, {
-    direct: { fr: 'Direct', en: 'Direct' },
-    indirect: { fr: 'Indirect', en: 'Indirect' },
-    balanced: { fr: 'Equilibre', en: 'Balanced' }
-  }],
-  [relationshipValueOptions, {
-    honesty: { fr: 'Honnetete', en: 'Honesty' },
-    trust: { fr: 'Confiance', en: 'Trust' },
-    communication: { fr: 'Communication', en: 'Communication' },
-    respect: { fr: 'Respect', en: 'Respect' },
-    loyalty: { fr: 'Loyaute', en: 'Loyalty' },
-    family: { fr: 'Famille', en: 'Family' },
-    growth: { fr: 'Croissance', en: 'Growth' },
-    support: { fr: 'Soutien', en: 'Support' },
-    humor: { fr: 'Humour', en: 'Humor' },
-    ambition: { fr: 'Ambition', en: 'Ambition' },
-    kindness: { fr: 'Gentillesse', en: 'Kindness' },
-    independence: { fr: 'Independance', en: 'Independence' },
-    romance: { fr: 'Romance', en: 'Romance' },
-    stability: { fr: 'Stabilite', en: 'Stability' }
-  }],
-  [preferredLocationOptions, {
-    local: { fr: 'Local', en: 'Local' },
-    regional: { fr: 'Regional', en: 'Regional' },
-    national: { fr: 'National', en: 'National' },
-    international: { fr: 'International', en: 'International' }
-  }],
-  [languageOptions, {
-    zh: { fr: 'Chinois', en: 'Chinese' },
-    en: { fr: 'Anglais', en: 'English' },
-    fr: { fr: 'Francais', en: 'French' },
-    es: { fr: 'Espagnol', en: 'Spanish' },
-    de: { fr: 'Allemand', en: 'German' }
-  }],
-  [contactChannelOptions, {
-    phone: { fr: 'Telephone', en: 'Phone' },
-    email: { fr: 'Email', en: 'Email' },
-    wechat: { fr: 'WeChat', en: 'WeChat' }
-  }],
-  [contactVisibilityOptions, {
-    after_introduction: { fr: 'Apres introduction', en: 'After introduction' },
-    owner_only: { fr: 'Proprietaire seulement', en: 'Owner only' },
-    disabled: { fr: 'Desactive', en: 'Disabled' }
-  }],
-  [ownershipRelationshipOptions, {
-    self: { fr: 'Moi-meme', en: 'Self' },
-    parent: { fr: 'Parent', en: 'Parent' },
-    father: { fr: 'Pere', en: 'Father' },
-    mother: { fr: 'Mere', en: 'Mother' },
-    relative: { fr: 'Proche', en: 'Relative' }
-  }],
-  [ownershipPermissionOptions, {
-    owner: { fr: 'Proprietaire', en: 'Owner' },
-    manager: { fr: 'Gestionnaire', en: 'Manager' }
-  }],
-  [ownershipStatusOptions, {
-    pending: { fr: 'En attente', en: 'Pending' },
-    active: { fr: 'Actif', en: 'Active' },
-    revoked: { fr: 'Revoque', en: 'Revoked' }
-  }],
-  [internalRecordSourceOptions, {
-    self_submitted: { fr: 'Soumis par soi-meme', en: 'Self submitted' },
-    family_submitted: { fr: 'Soumis par la famille', en: 'Family submitted' },
-    staff_collected: { fr: 'Collecte par equipe', en: 'Staff collected' }
-  }]
+const optionGroupKeys = new Map<OptionItem[], string>([
+  [profileTypes, 'profile.profileType'],
+  [profileStatuses, 'profile.profileStatus'],
+  [photoStatuses, 'profile.photoStatus'],
+  [reviewStatuses, 'profile.reviewStatus'],
+  [materialStatuses, 'profile.verificationStatus'],
+  [verificationStatuses, 'profile.verificationStatus'],
+  [verificationMaterialTypes, 'verification.materialType'],
+  [verificationMaterialStatuses, 'verification.materialStatus'],
+  [genders, 'profile.gender'],
+  [degreeLevels, 'profile.degreeLevel'],
+  [maritalStatuses, 'profile.maritalStatus'],
+  [childrenPlans, 'profile.childrenPlan'],
+  [datingIntentions, 'profile.datingIntentionCode'],
+  [relocationOptions, 'profile.relocation'],
+  [smokingOptions, 'profile.smoking'],
+  [drinkingOptions, 'profile.drinking'],
+  [activityLevels, 'profile.activityLevel'],
+  [weekendStyles, 'profile.weekendStyle'],
+  [petOptions, 'profile.pets'],
+  [communicationStyles, 'profile.communicationStyle'],
+  [relationshipValueOptions, 'profile.relationshipValues'],
+  [preferredLocationOptions, 'profile.preferredLocation'],
+  [languageOptions, 'profile.languages'],
+  [contactChannelOptions, 'profile.preferredChannel'],
+  [contactVisibilityOptions, 'profile.contactVisibility'],
+  [ownershipRelationshipOptions, 'profile.relationshipToProfile']
 ])
+
+const profileCodeOptionGroups: Record<string, string> = {
+  city: 'profile.city',
+  country: 'profile.country',
+  nationality: 'profile.nationality',
+  education: 'profile.education',
+  industry: 'profile.industry',
+  relationship_goal: 'profile.relationshipGoal',
+  residence_plan: 'profile.residencePlan',
+  preferred_education: 'profile.preferredEducation',
+  family_life: 'profile.familyLife',
+  exercise: 'profile.exercise'
+}
+
+export async function loadCupidCommonOptions(locale: string = 'zh'): Promise<void> {
+  await useCupidOptionsStore().ensureOptions(locale)
+}
+
+function commonOptionLabel(group: string | undefined, value: string, locale: string): string | undefined {
+  const store = useCupidOptionsStore()
+  const label = store.optionLabel(locale, group, value)
+  if (!label) {
+    void store.ensureOptions(locale)
+  }
+  return label
+}
 
 export const localizedFieldLabels: Record<string, string> = {
   profile_name: '资料名称',
@@ -375,37 +299,29 @@ export const localizedProviderLabels: Record<string, string> = {
 }
 
 export function localizedOriginLabel(row: any): string {
-  if (row.provider === 'human') {
-    return '人工'
-  }
+  if (row.provider === 'human') return '人工'
   if (row.source === 'machine' || row.provider === 'translation_api' || row.provider === 'libretranslate') {
     return '机器翻译'
   }
   return localizedSourceLabels[row.source] || localizedProviderLabels[row.provider] || row.source || row.provider || '-'
 }
 
-export function labelOf(options: Array<{ label: string; value: string }>, value: string, locale: string = 'zh'): string {
-  if (!value) {
-    return '-'
-  }
+export function labelOf(options: OptionItem[], value: string, locale: string = 'zh'): string {
+  if (value === undefined || value === null || value === '') return '-'
   const normalizedValue = String(value).toLowerCase()
   const option = options.find((item) => item.value === value || item.value.toLowerCase() === normalizedValue)
-  const localizedLabel = optionLocaleLabels.get(options)?.[option?.value || normalizedValue]?.[locale as ReviewLocale]
-  return localizedLabel || option?.label || value
+  return commonOptionLabel(optionGroupKeys.get(options), option?.value || value, locale) || option?.label || String(value)
 }
 
-export function labelsOf(options: Array<{ label: string; value: string }>, values: any[], locale: string = 'zh'): string {
-  if (!Array.isArray(values) || values.length === 0) {
-    return '-'
-  }
+export function labelsOf(options: OptionItem[], values: any[], locale: string = 'zh'): string {
+  if (!Array.isArray(values) || values.length === 0) return '-'
   return values.map((item) => labelOf(options, typeof item === 'string' ? item : item.valueCode || item.languageCode, locale)).join(' / ')
 }
 
-export function profileCodeLabel(fieldName: string, value: string): string {
-  if (!value) {
-    return '-'
-  }
-  return profileCodeLabels[fieldName]?.[String(value).toLowerCase()] || String(value).replace(/[_-]+/g, ' ')
+export function profileCodeLabel(fieldName: string, value: string, locale: string = 'zh'): string {
+  if (!value) return '-'
+  const key = String(value)
+  return commonOptionLabel(profileCodeOptionGroups[fieldName], key, locale) || key.replace(/[_-]+/g, ' ')
 }
 
 export function ageOf(birthYear: number): string {
@@ -413,12 +329,8 @@ export function ageOf(birthYear: number): string {
 }
 
 export function yesNo(value: boolean | number, locale: string = 'zh'): string {
-  if (locale === 'en') {
-    return value ? 'Yes' : 'No'
-  }
-  if (locale === 'fr') {
-    return value ? 'Oui' : 'Non'
-  }
+  if (locale === 'en') return value ? 'Yes' : 'No'
+  if (locale === 'fr') return value ? 'Oui' : 'Non'
   return value ? '是' : '否'
 }
 
@@ -430,8 +342,8 @@ export function profileSummary(row: any): string {
   const parts = [
     labelOf(genders, row.gender),
     ageOf(row.birthYear),
-    row.cityLabel || row.cityCode,
-    row.industryLabel,
+    row.cityLabel || profileCodeLabel('city', row.cityCode),
+    row.industryLabel || profileCodeLabel('industry', row.industryCode),
     row.careerDirectionLabel
   ].filter(Boolean).filter((item) => item !== '-')
   return parts.join(' / ') || '-'

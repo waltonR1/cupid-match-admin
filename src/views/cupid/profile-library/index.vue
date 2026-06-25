@@ -124,11 +124,11 @@
         <el-descriptions-item label="性别">{{ labelOf(genders, detail.gender, activeLocale) }}</el-descriptions-item>
         <el-descriptions-item label="年龄">{{ ageOf(detail.birthYear) }}</el-descriptions-item>
         <el-descriptions-item label="身高">{{ detail.height ? `${detail.height} cm` : '-' }}</el-descriptions-item>
-        <el-descriptions-item label="国家">{{ localizedFieldValue('country', profileCodeLabel('country', detail.countryCode)) }}</el-descriptions-item>
-        <el-descriptions-item label="城市">{{ localizedFieldValue('city', profileCodeLabel('city', detail.cityCode)) }}</el-descriptions-item>
-        <el-descriptions-item label="国籍">{{ localizedFieldValue('nationality', profileCodeLabel('nationality', detail.nationalityCode)) }}</el-descriptions-item>
-        <el-descriptions-item label="学历">{{ localizedFieldValue('education', profileCodeLabel('education', detail.educationCode)) }} / {{ labelOf(degreeLevels, detail.degreeLevel, activeLocale) }}</el-descriptions-item>
-        <el-descriptions-item label="行业">{{ localizedFieldValue('industry', profileCodeLabel('industry', detail.industryCode)) }}</el-descriptions-item>
+        <el-descriptions-item label="国家">{{ localizedFieldValue('country', profileCodeLabel('country', detail.countryCode, activeLocale)) }}</el-descriptions-item>
+        <el-descriptions-item label="城市">{{ localizedFieldValue('city', profileCodeLabel('city', detail.cityCode, activeLocale)) }}</el-descriptions-item>
+        <el-descriptions-item label="国籍">{{ localizedFieldValue('nationality', profileCodeLabel('nationality', detail.nationalityCode, activeLocale)) }}</el-descriptions-item>
+        <el-descriptions-item label="学历">{{ localizedFieldValue('education', profileCodeLabel('education', detail.educationCode, activeLocale)) }} / {{ labelOf(degreeLevels, detail.degreeLevel, activeLocale) }}</el-descriptions-item>
+        <el-descriptions-item label="行业">{{ localizedFieldValue('industry', profileCodeLabel('industry', detail.industryCode, activeLocale)) }}</el-descriptions-item>
         <el-descriptions-item label="职业方向">{{ localizedFieldValue('career_direction') }}</el-descriptions-item>
         <el-descriptions-item label="语言" :span="2">{{ labelsOf(languageOptions, detail.languages, activeLocale) }}</el-descriptions-item>
       </el-descriptions>
@@ -414,4 +414,3 @@ getList()
   border: 1px solid var(--el-border-color-lighter);
 }
 </style>
-
