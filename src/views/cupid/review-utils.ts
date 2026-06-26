@@ -55,6 +55,17 @@ export const ownershipRelationshipOptions = optionGroup('profile.relationshipToP
 export const ownershipPermissionOptions = optionGroup('profile.ownershipPermission', ['owner', 'manager'])
 export const ownershipStatusOptions = optionGroup('profile.ownershipStatus', ['pending', 'active', 'revoked'])
 export const internalRecordSourceOptions = optionGroup('profile.internalRecordSource', ['self_submitted', 'family_submitted', 'staff_collected'])
+export const introductionStatuses = optionGroup('introduction.status', ['requested', 'accepted', 'declined', 'cancelled', 'expired', 'cooldown'])
+
+export const introductionSortOptions = [
+  { label: '待受理优先', value: 'pendingFirst' },
+  { label: '申请时间最新', value: 'requestedDesc' },
+  { label: '更新时间最新', value: 'updatedDesc' },
+  { label: '目标资料名称', value: 'targetProfileNameAsc' },
+  { label: '申请人名称', value: 'requesterNameAsc' }
+]
+
+
 
 export const adminReviewSortOptions = [
   { label: '待审核优先', value: 'reviewFirst' },

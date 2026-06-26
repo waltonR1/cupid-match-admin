@@ -12,6 +12,14 @@ export interface VerificationResetPayload {
   reason: string
 }
 
+export interface IntroductionActionPayload {
+  reason?: string
+}
+
+export interface IntroductionNotePayload {
+  note: string
+}
+
 export function listProfiles(query: Record<string, any>): Promise<TableDataInfo<any[]>> {
   return request({ url: '/cupid/profile/list', method: 'get', params: query })
 }
@@ -66,6 +74,26 @@ export function createAdminVerificationMaterial(data: Record<string, string>, fi
     data: formData,
     headers: { 'Content-Type': 'multipart/form-data' }
   })
+}
+
+export function listIntroductions(query: Record<string, any>): Promise<TableDataInfo<any[]>> {
+  return request({ url: '/cupid/introduction/list', method: 'get', params: query })
+}
+
+export function getIntroduction(requestId: string): Promise<AjaxResult> {
+  return request({ url: `/cupid/introduction/${requestId}`, method: 'get' })
+}
+
+export function acceptIntroduction(requestId: string, data: IntroductionActionPayload): Promise<AjaxResult> {
+  return request({ url: `/cupid/introduction/${requestId}/accept`, method: 'post', data })
+}
+
+export function declineIntroduction(requestId: string, data: IntroductionActionPayload): Promise<AjaxResult> {
+  return request({ url: `/cupid/introduction/${requestId}/decline`, method: 'post', data })
+}
+
+export function noteIntroduction(requestId: string, data: IntroductionNotePayload): Promise<AjaxResult> {
+  return request({ url: `/cupid/introduction/${requestId}/note`, method: 'post', data })
 }
 
 export function resetVerification(data: VerificationResetPayload): Promise<AjaxResult> {
