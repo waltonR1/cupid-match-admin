@@ -6,6 +6,7 @@ export type CupidOptionLocale = 'zh' | 'fr' | 'en'
 interface CupidOptionsStateItem {
   version: string
   groups: CupidCommonOptionGroups
+  labelGroups: CupidCommonOptionGroups
 }
 
 const PERSIST_KEY = 'cupid-common-options'
@@ -36,12 +37,13 @@ const useCupidOptionsStore = defineStore('cupidOptions', {
       this.loading[loc] = true
       try {
         const current = this.cache[loc]
-        const res: any = await getCupidCommonOptions({ lang: loc, version: current?.version })
+        const res: any = await getCupidCommonOptions({ lang: loc, version: current?.labelGroups ? current.version : undefined })
         const data = res?.data
         if (!data?.unchanged && data?.groups) {
           this.cache[loc] = {
             version: data.version,
-            groups: data.groups
+            groups: data.groups,
+            labelGroups: data.labelGroups ?? data.groups
           }
           savePersistedCache(this.cache)
         }
@@ -54,7 +56,7 @@ const useCupidOptionsStore = defineStore('cupidOptions', {
       if (!group || value === undefined || value === null || value === '') return undefined
       const loc = normalizeLocale(locale)
       const normalizedValue = String(value).toLowerCase()
-      const option = this.cache[loc]?.groups[group]?.find((item) =>
+      const option = this.cache[loc]?.labelGroups?.[group]?.find((item) =>
         item.value === value || item.value.toLowerCase() === normalizedValue
       )
       return option?.label
