@@ -99,3 +99,86 @@ export function noteIntroduction(requestId: string, data: IntroductionNotePayloa
 export function resetVerification(data: VerificationResetPayload): Promise<AjaxResult> {
   return request({ url: '/cupid/verification/reset', method: 'post', data })
 }
+
+// -- Event & Registration --
+
+export interface EventStatusPayload {
+  status: string
+  reason: string
+}
+
+export interface EventCreatePayload {
+  title: string
+  status?: string
+  visibility: string
+  consumesMembershipQuota: boolean
+  cityCode: string
+  addressVisibility: string
+  eventDate: string
+  startTime: string
+  endTime: string
+  capacity: number
+  coverImageUrl?: string
+  languageCodes?: string[]
+  relationshipFocus?: string[]
+  summary?: string
+  venue?: string
+  address?: string
+  format?: string
+  audience?: string
+  noteItems?: Array<{
+    title: string
+    description: string
+  }>
+  agendaItems?: Array<{
+    time: string
+    title: string
+    description: string
+  }>
+}
+
+export interface RegistrationReviewPayload {
+  status: 'requested' | 'confirmed' | 'declined' | 'waitlist' | 'cancelled' | 'attended'
+  reason: string
+}
+
+export function listAdminEvents(query: Record<string, any>): Promise<TableDataInfo<any[]>> {
+  return request({ url: '/cupid/event/list', method: 'get', params: query })
+}
+
+export function getAdminEvent(id: string): Promise<AjaxResult> {
+  return request({ url: `/cupid/event/${id}`, method: 'get' })
+}
+
+export function createAdminEvent(data: EventCreatePayload): Promise<AjaxResult> {
+  return request({ url: '/cupid/event', method: 'post', data })
+}
+
+export function updateAdminEvent(id: string, data: EventCreatePayload): Promise<AjaxResult> {
+  return request({ url: `/cupid/event/${id}`, method: 'put', data })
+}
+
+export function changeEventStatus(id: string, data: EventStatusPayload): Promise<AjaxResult> {
+  return request({ url: `/cupid/event/${id}/status`, method: 'post', data })
+}
+
+export function uploadCommonFile(data: FormData): Promise<AjaxResult> {
+  return request({
+    url: '/common/upload',
+    method: 'post',
+    data,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+export function listAdminRegistrations(query: Record<string, any>): Promise<TableDataInfo<any[]>> {
+  return request({ url: '/cupid/eventRegistration/list', method: 'get', params: query })
+}
+
+export function getAdminRegistration(id: string): Promise<AjaxResult> {
+  return request({ url: `/cupid/eventRegistration/${id}`, method: 'get' })
+}
+
+export function reviewRegistration(id: string, data: RegistrationReviewPayload): Promise<AjaxResult> {
+  return request({ url: `/cupid/eventRegistration/${id}/review`, method: 'post', data })
+}

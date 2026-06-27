@@ -65,6 +65,23 @@ export const introductionSortOptions = [
   { label: '申请人名称', value: 'requesterNameAsc' }
 ]
 
+export const eventStatuses = optionGroup('event.status', ['draft', 'open', 'waitlist', 'closed', 'completed'])
+export const eventVisibilityOptions = optionGroup('event.visibility', ['public', 'registered', 'member'])
+export const eventAddressVisibilityOptions = optionGroup('event.addressVisibility', ['registered_only', 'confirmed_attendee_only'])
+export const eventRegStatuses = optionGroup('event.registrationStatus', ['requested', 'confirmed', 'waitlist', 'declined', 'cancelled', 'attended'])
+
+export const eventSortOptions = [
+  { label: '日期最新', value: 'dateDesc' },
+  { label: '创建时间最新', value: 'createdDesc' }
+]
+
+export const registrationSortOptions = [
+  { label: '申请时间最新', value: 'requestedDesc' },
+  { label: '更新时间最新', value: 'updatedDesc' },
+  { label: '活动名称', value: 'eventTitleAsc' },
+  { label: '用户名称', value: 'userNameAsc' }
+]
+
 
 
 export const adminReviewSortOptions = [
@@ -93,11 +110,7 @@ export async function loadCupidCommonOptions(locale: string = 'zh'): Promise<voi
 
 function commonOptionLabel(group: string | undefined, value: string, locale: string): string | undefined {
   const store = useCupidOptionsStore()
-  const label = store.optionLabel(locale, group, value)
-  if (!label) {
-    void store.ensureOptions(locale)
-  }
-  return label
+  return store.optionLabel(locale, group, value)
 }
 
 export const localizedFieldLabels: Record<string, string> = {
@@ -142,6 +155,15 @@ export function optionsOf(options: OptionGroup, locale: string = 'zh'): OptionIt
   return options.values.map((value) => ({
     value,
     label: labelOf(options, value, locale)
+  }))
+}
+
+export function optionsForGroup(group: string, locale: string = 'zh'): OptionItem[] {
+  const store = useCupidOptionsStore()
+  const groups = store.cache?.[locale as ReviewLocale]?.groups ?? {}
+  return (groups[group] ?? []).map((item) => ({
+    value: item.value,
+    label: item.label
   }))
 }
 
