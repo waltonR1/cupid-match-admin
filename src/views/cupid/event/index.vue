@@ -516,9 +516,11 @@ async function submitCreate() {
 
 function allowedTransitions(currentStatus: string): string[] {
   if (currentStatus === 'draft') return ['open']
-  if (currentStatus === 'open') return ['waitlist', 'closed', 'completed']
-  if (currentStatus === 'waitlist') return ['closed', 'completed']
-  if (currentStatus === 'closed') return ['open', 'completed']
+  if (currentStatus === 'open') return ['waitlist', 'closed', 'completed', 'hidden']
+  if (currentStatus === 'waitlist') return ['closed', 'completed', 'hidden']
+  if (currentStatus === 'closed') return ['open', 'completed', 'hidden']
+  if (currentStatus === 'completed') return ['hidden']
+  if (currentStatus === 'hidden') return ['open', 'waitlist', 'closed', 'completed']
   return []
 }
 
@@ -543,7 +545,7 @@ async function submitStatusChange() {
 
 function eventStatusTagType(status: string) {
   if (status === 'open') return 'success'
-  if (status === 'draft') return 'info'
+  if (status === 'draft' || status === 'hidden') return 'info'
   if (status === 'completed') return ''
   return 'warning'
 }

@@ -65,7 +65,7 @@ export const introductionSortOptions = [
   { label: '申请人名称', value: 'requesterNameAsc' }
 ]
 
-export const eventStatuses = optionGroup('event.status', ['draft', 'open', 'waitlist', 'closed', 'completed'])
+export const eventStatuses = optionGroup('event.status', ['draft', 'open', 'waitlist', 'closed', 'completed', 'hidden'])
 export const eventVisibilityOptions = optionGroup('event.visibility', ['public', 'registered', 'member'])
 export const eventAddressVisibilityOptions = optionGroup('event.addressVisibility', ['registered_only', 'confirmed_attendee_only'])
 export const eventRegStatuses = optionGroup('event.registrationStatus', ['requested', 'confirmed', 'waitlist', 'declined', 'cancelled', 'attended'])
