@@ -170,10 +170,18 @@
         <el-divider content-position="left">当前会话</el-divider>
         <el-table :data="detail.sessions" border>
           <el-table-column label="Session ID" min-width="260" prop="sessionId" />
+          <el-table-column label="IP" min-width="140" prop="ip" />
+          <el-table-column label="Device ID" min-width="160" prop="deviceId" show-overflow-tooltip />
+          <el-table-column label="User-Agent" min-width="220" show-overflow-tooltip>
+            <template #default="{ row }">{{ row.userAgent || '-' }}</template>
+          </el-table-column>
           <el-table-column label="登录方式" width="120" prop="provider" />
           <el-table-column label="标识" min-width="180" prop="maskedIdentifier" />
           <el-table-column label="创建时间" width="170">
             <template #default="{ row }">{{ sessionTime(row.createdAt) }}</template>
+          </el-table-column>
+          <el-table-column label="最后活跃时间" width="170">
+            <template #default="{ row }">{{ sessionTime(row.lastActiveAt) }}</template>
           </el-table-column>
           <el-table-column label="过期时间" width="170">
             <template #default="{ row }">{{ sessionTime(row.expiresAt) }}</template>

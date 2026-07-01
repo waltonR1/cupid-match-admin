@@ -163,7 +163,8 @@ const eventTypeOptions = [
 const eventResultOptions = [
   { label: '成功', value: 'success' },
   { label: '失败', value: 'failed' },
-  { label: '阻断', value: 'blocked' }
+  { label: '阻断', value: 'blocked' },
+  { label: '命中', value: 'detected' }
 ]
 
 async function getList() {
@@ -212,7 +213,7 @@ function eventResultLabel(value?: string) {
 
 function eventResultTagType(value?: string) {
   if (value === 'success') return 'success'
-  if (value === 'blocked') return 'warning'
+  if (value === 'blocked' || value === 'detected') return 'warning'
   if (value === 'failed') return 'danger'
   return 'info'
 }

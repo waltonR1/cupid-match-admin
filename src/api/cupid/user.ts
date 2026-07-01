@@ -52,7 +52,11 @@ export interface CupidAdminUserSession {
   provider?: string
   maskedIdentifier?: string
   createdAt: number
+  lastActiveAt?: number
   expiresAt: number
+  ip?: string
+  deviceId?: string
+  userAgent?: string
 }
 
 export interface CupidAdminUserDetail extends CupidAdminUserListItem {
