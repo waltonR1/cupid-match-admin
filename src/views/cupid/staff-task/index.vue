@@ -80,7 +80,10 @@
         </template>
       </el-table-column>
       <el-table-column label="截止时间" width="170">
-        <template #default="{ row }">{{ parseTime(row.dueAt) || '-' }}</template>
+        <template #default="{ row }">
+          <div>{{ parseTime(row.dueAt) || '-' }}</div>
+          <el-tag v-if="Boolean(row.overdue)" type="danger" size="small">已逾期</el-tag>
+        </template>
       </el-table-column>
       <el-table-column label="更新时间" width="170">
         <template #default="{ row }">{{ parseTime(row.updatedAt) || '-' }}</template>
@@ -116,7 +119,10 @@
           <el-descriptions-item label="对象ID">{{ detail.subjectId }}</el-descriptions-item>
           <el-descriptions-item label="状态">{{ statusLabel(detail.status) }}</el-descriptions-item>
           <el-descriptions-item label="优先级">{{ priorityLabel(detail.priority) }}</el-descriptions-item>
-          <el-descriptions-item label="截止时间">{{ parseTime(detail.dueAt) || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="截止时间">
+            {{ parseTime(detail.dueAt) || '-' }}
+            <el-tag v-if="Boolean(detail.overdue)" type="danger" size="small">已逾期</el-tag>
+          </el-descriptions-item>
           <el-descriptions-item label="完成时间">{{ parseTime(detail.completedAt) || '-' }}</el-descriptions-item>
           <el-descriptions-item label="说明(zh)" :span="2">{{ detail.noteZh || '-' }}</el-descriptions-item>
           <el-descriptions-item label="说明(fr)" :span="2">{{ detail.noteFr || '-' }}</el-descriptions-item>

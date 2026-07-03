@@ -25,6 +25,7 @@ export interface CupidAdminStaffTaskListItem {
   status: string
   priority: string
   dueAt?: string
+  overdue?: boolean | number
   completedAt?: string
   createdAt: string
   updatedAt?: string
