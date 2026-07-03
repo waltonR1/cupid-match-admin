@@ -49,6 +49,7 @@
             >
               <template #default="scope">
                 <el-button
+                  v-hasPermi="['monitor:cache:clear']"
                   link
                   type="primary"
                   icon="Delete"
@@ -100,6 +101,7 @@
             >
               <template #default="scope">
                 <el-button
+                  v-hasPermi="['monitor:cache:clear']"
                   link
                   type="primary"
                   icon="Delete"
@@ -116,6 +118,7 @@
           <template #header>
             <Document style="width: 1em; height: 1em; vertical-align: middle;" /> <span style="vertical-align: middle;">缓存内容</span>
             <el-button
+              v-hasPermi="['monitor:cache:clear']"
               style="float: right; padding: 3px 0"
               link
               type="primary"
