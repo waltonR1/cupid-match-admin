@@ -29,6 +29,25 @@
       <template #header>
         <div class="card-heading">
           <div>
+            <strong>运营与消息治理</strong>
+            <span>实时汇总业务规模、消息结果与待处理重试</span>
+          </div>
+          <el-tag type="info" effect="plain">只读</el-tag>
+        </div>
+      </template>
+      <section class="metric-grid operations-grid">
+        <article v-for="item in operationMetrics" :key="item.label" class="metric-card">
+          <span class="metric-label">{{ item.label }}</span>
+          <strong>{{ formatCount(item.value) }}</strong>
+          <small>{{ item.hint }}</small>
+        </article>
+      </section>
+    </el-card>
+
+    <el-card class="detail-card" shadow="never">
+      <template #header>
+        <div class="card-heading">
+          <div>
             <strong>Redis 分类明细</strong>
             <span>仅统计数量，不读取或展示 key 内容</span>
           </div>
@@ -72,7 +91,16 @@ const overview = reactive<CupidMonitorOverview>({
   verificationCodes: 0,
   riskCounters: 0,
   activeChallengeTokens: 0,
-  redisMetrics: []
+  redisMetrics: [],
+  operations: {
+    messageSuccessCount: 0,
+    messageFailureCount: 0,
+    pendingRetryCount: 0,
+    exhaustedRetryCount: 0,
+    activeUserCount: 0,
+    activeMembershipCount: 0,
+    confirmedEventRegistrationCount: 0
+  }
 })
 
 const summaryMetrics = computed(() => [
@@ -82,6 +110,16 @@ const summaryMetrics = computed(() => [
   { label: '待验证验证码', value: overview.verificationCodes, hint: '尚未过期的验证码缓存' },
   { label: '风险计数器', value: overview.riskCounters, hint: '连续登录失败窗口' },
   { label: '安全挑战令牌', value: overview.activeChallengeTokens, hint: '数据库内有效一次性令牌' }
+])
+
+const operationMetrics = computed(() => [
+  { label: '消息发送成功', value: overview.operations?.messageSuccessCount, hint: '后台单发与群发累计成功' },
+  { label: '消息发送失败', value: overview.operations?.messageFailureCount, hint: '含待重试与已耗尽' },
+  { label: '待重试消息', value: overview.operations?.pendingRetryCount, hint: '等待调度器再次发送' },
+  { label: '重试已耗尽', value: overview.operations?.exhaustedRetryCount, hint: '需要人工排查' },
+  { label: '活跃用户', value: overview.operations?.activeUserCount, hint: '当前有效 C 端账号' },
+  { label: '有效会员', value: overview.operations?.activeMembershipCount, hint: '当前 active 会员' },
+  { label: '活动确认报名', value: overview.operations?.confirmedEventRegistrationCount, hint: '累计 confirmed 报名' }
 ])
 
 async function loadOverview() {
@@ -233,6 +271,10 @@ onMounted(() => {
   margin-top: 16px;
   border-color: var(--monitor-line);
   border-radius: 12px;
+}
+
+.operations-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .card-heading {

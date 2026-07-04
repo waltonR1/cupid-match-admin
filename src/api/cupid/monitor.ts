@@ -18,6 +18,15 @@ export interface CupidMonitorOverview {
   riskCounters: number
   activeChallengeTokens: number
   redisMetrics: CupidRedisMetric[]
+  operations: {
+    messageSuccessCount: number
+    messageFailureCount: number
+    pendingRetryCount: number
+    exhaustedRetryCount: number
+    activeUserCount: number
+    activeMembershipCount: number
+    confirmedEventRegistrationCount: number
+  }
 }
 
 export const getCupidMonitorOverview = (): Promise<AjaxResult<CupidMonitorOverview>> =>

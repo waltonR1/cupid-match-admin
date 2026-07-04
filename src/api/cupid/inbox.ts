@@ -51,8 +51,10 @@ export interface InboxBroadcastTargetItem {
   userId: string
   accountName?: string
   messageId?: string
-  status: 'success' | 'failure'
+  status: 'success' | 'failure' | 'retrying' | 'exhausted'
   errorMessage?: string
+  retryCount?: number
+  nextRetryAt?: string
   createdAt: string
 }
 
@@ -72,8 +74,10 @@ export interface InboxSingleHistoryItem {
   locale?: string
   subjectType?: string
   subjectId?: string
-  status: 'pending' | 'success' | 'failure'
+  status: 'pending' | 'success' | 'failure' | 'retrying' | 'exhausted'
   errorMessage?: string
+  retryCount?: number
+  nextRetryAt?: string
   staffUserName?: string
   createdAt: string
   updatedAt?: string

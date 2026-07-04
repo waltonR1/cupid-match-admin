@@ -258,6 +258,12 @@
           </el-table-column>
           <el-table-column label="消息ID" prop="messageId" min-width="220" />
           <el-table-column label="失败原因" prop="errorMessage" min-width="220" show-overflow-tooltip />
+          <el-table-column label="重试" min-width="150">
+            <template #default="{ row }">
+              {{ row.retryCount || 0 }} 次
+              <div v-if="row.nextRetryAt" class="muted">{{ row.nextRetryAt }}</div>
+            </template>
+          </el-table-column>
           <el-table-column label="时间" prop="createdAt" min-width="160" />
         </el-table>
       </template>
@@ -278,6 +284,8 @@
           </el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ singleDetail.createdAt }}</el-descriptions-item>
           <el-descriptions-item label="更新时间">{{ singleDetail.updatedAt || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="重试次数">{{ singleDetail.retryCount || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="下次重试">{{ singleDetail.nextRetryAt || '-' }}</el-descriptions-item>
           <el-descriptions-item label="失败原因" :span="2">{{ singleDetail.errorMessage || '-' }}</el-descriptions-item>
         </el-descriptions>
 
@@ -402,6 +410,8 @@ function statusLabel(status: string) {
   if (status === 'success') return '成功'
   if (status === 'failure') return '失败'
   if (status === 'pending') return '处理中'
+  if (status === 'retrying') return '等待重试'
+  if (status === 'exhausted') return '重试耗尽'
   return status || '-'
 }
 
