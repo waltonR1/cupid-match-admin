@@ -32,7 +32,7 @@
             <el-form-item label="通知正文" :prop="`localizedFields.${index}.body`" :rules="requiredRule"><el-input v-model="field.body" type="textarea" :rows="5" maxlength="4000" show-word-limit /></el-form-item>
           </el-tab-pane>
         </el-tabs>
-        <el-alert type="info" :closable="false" title="可用变量：profileName、eventTitle、status、reason、verificationType、accountName" />
+        <el-alert type="info" :closable="false" title="可用变量：profileName、eventTitle、status、reason、verificationType、accountName、code、ttlMinutes、purpose" />
       </el-form>
       <template #footer><el-button @click="dialogOpen = false">取消</el-button><el-button type="primary" :loading="saving" @click="save">确认</el-button></template>
     </el-dialog>
