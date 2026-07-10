@@ -59,6 +59,11 @@
           <el-table-column label="创建时间" width="170">
             <template #default="{ row }">{{ parseTime(row.createdAt) }}</template>
           </el-table-column>
+          <el-table-column label="操作" width="90" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="openOrderDetail(row.id)">详情</el-button>
+            </template>
+          </el-table-column>
         </el-table>
 
         <pagination v-show="orderTotal > 0" :total="orderTotal" v-model:page="orderQuery.pageNum" v-model:limit="orderQuery.pageSize" @pagination="getOrderList" />
@@ -102,11 +107,108 @@
           <el-table-column label="处理时间" width="170">
             <template #default="{ row }">{{ parseTime(row.processedAt) || '-' }}</template>
           </el-table-column>
+          <el-table-column label="操作" width="90" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="openWebhookDetail(row.id)">详情</el-button>
+            </template>
+          </el-table-column>
         </el-table>
 
         <pagination v-show="webhookTotal > 0" :total="webhookTotal" v-model:page="webhookQuery.pageNum" v-model:limit="webhookQuery.pageSize" @pagination="getWebhookList" />
       </el-tab-pane>
     </el-tabs>
+
+    <el-drawer v-model="orderDetailVisible" title="支付订单详情" size="760px">
+      <template v-if="orderDetail">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="订单ID">{{ orderDetail.id }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="orderStatusTag(orderDetail.status)">{{ orderStatusLabel(orderDetail.status) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="用户">{{ orderDetail.accountName || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="用户ID">{{ orderDetail.userId || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="会员等级">{{ membershipLabel(orderDetail.tier) }}</el-descriptions-item>
+          <el-descriptions-item label="金额">{{ formatAmount(orderDetail.amountCents, orderDetail.currency) }}</el-descriptions-item>
+          <el-descriptions-item label="Provider">{{ orderDetail.provider || '-' }} / {{ orderDetail.environment || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="Customer">{{ orderDetail.customerId || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="Checkout Session" :span="2">{{ orderDetail.checkoutSessionId || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="Subscription" :span="2">{{ orderDetail.subscriptionId || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="Price" :span="2">{{ orderDetail.priceId || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="订阅状态">{{ orderDetail.subscriptionStatus || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="周期末取消">{{ truthy(orderDetail.cancelAtPeriodEnd) ? '是' : '否' }}</el-descriptions-item>
+          <el-descriptions-item label="周期开始">{{ parseTime(orderDetail.currentPeriodStartedAt) || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="周期结束">{{ parseTime(orderDetail.currentPeriodEndsAt) || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="会员ID" :span="2">{{ orderDetail.membershipId || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="会员状态">{{ orderDetail.membershipStatus || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="会员到期">{{ parseTime(orderDetail.membershipExpiresAt) || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="失败原因" :span="2">{{ orderDetail.failureReason || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ parseTime(orderDetail.createdAt) || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="更新时间">{{ parseTime(orderDetail.updatedAt) || '-' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <div v-hasPermi="['cupid:payment:stripe:open']">
+          <div class="section-title">Stripe 操作入口</div>
+          <el-alert
+            title="退款、取消订阅等高风险操作请在 Stripe Dashboard 内完成；本系统通过 webhook 同步结果。"
+            type="warning"
+            :closable="false"
+            show-icon
+          />
+          <div class="stripe-actions">
+            <el-button :loading="stripeLinksLoading" @click="loadStripeLinks">
+              加载 Stripe 跳转
+            </el-button>
+            <el-button
+              v-for="link in stripeLinks"
+              :key="`${link.type}:${link.externalId}`"
+              type="primary"
+              plain
+              @click="openStripeLink(link.url)"
+            >
+              {{ link.label }}
+            </el-button>
+          </div>
+        </div>
+
+        <div class="section-title">支付流水</div>
+        <el-table :data="orderDetail.payments || []" size="small">
+          <el-table-column label="支付ID" prop="paymentId" min-width="180" show-overflow-tooltip />
+          <el-table-column label="发票ID" prop="invoiceId" min-width="180" show-overflow-tooltip />
+          <el-table-column label="Charge" prop="chargeId" min-width="180" show-overflow-tooltip />
+          <el-table-column label="状态" width="110">
+            <template #default="{ row }">
+              <el-tag :type="paymentStatusTag(row.status)">{{ row.status || '-' }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="金额" width="120">
+            <template #default="{ row }">{{ formatAmount(row.amountCents, row.currency) }}</template>
+          </el-table-column>
+          <el-table-column label="支付时间" width="170">
+            <template #default="{ row }">{{ parseTime(row.paidAt) || '-' }}</template>
+          </el-table-column>
+        </el-table>
+      </template>
+      <el-empty v-else description="暂无详情" />
+    </el-drawer>
+
+    <el-drawer v-model="webhookDetailVisible" title="支付回调详情" size="760px">
+      <template v-if="webhookDetail">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="事件ID" :span="2">{{ webhookDetail.eventId }}</el-descriptions-item>
+          <el-descriptions-item label="事件类型">{{ webhookDetail.eventType || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="处理状态">
+            <el-tag :type="webhookStatusTag(webhookDetail.processStatus)">{{ webhookStatusLabel(webhookDetail.processStatus) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="环境">{{ webhookDetail.provider || '-' }} / {{ webhookDetail.environment || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="接收时间">{{ parseTime(webhookDetail.receivedAt) || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="处理时间">{{ parseTime(webhookDetail.processedAt) || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="处理信息" :span="2">{{ webhookDetail.processMessage || '-' }}</el-descriptions-item>
+        </el-descriptions>
+        <div class="section-title">原始 Payload</div>
+        <pre class="payload-preview">{{ formatPayload(webhookDetail.payloadJson) }}</pre>
+      </template>
+      <el-empty v-else description="暂无详情" />
+    </el-drawer>
   </div>
 </template>
 
@@ -114,9 +216,15 @@
 import { onMounted, reactive, ref } from 'vue'
 import { parseTime } from '@/utils/ruoyi'
 import {
+  getCupidPaymentOrder,
+  getCupidPaymentStripeLinks,
+  getCupidPaymentWebhook,
   listCupidPaymentOrders,
   listCupidPaymentWebhooks,
+  type CupidPaymentOrderDetail,
   type CupidPaymentOrderItem,
+  type CupidPaymentStripeLink,
+  type CupidPaymentWebhookDetail,
   type CupidPaymentWebhookItem
 } from '@/api/cupid/payment'
 import { loadCupidCommonOptions, optionsForGroup } from '@/views/cupid/review-utils'
@@ -126,6 +234,12 @@ const activeTab = ref<'orders' | 'webhooks'>('orders')
 const loading = ref(false)
 const orderRows = ref<CupidPaymentOrderItem[]>([])
 const webhookRows = ref<CupidPaymentWebhookItem[]>([])
+const orderDetail = ref<CupidPaymentOrderDetail>()
+const webhookDetail = ref<CupidPaymentWebhookDetail>()
+const stripeLinks = ref<CupidPaymentStripeLink[]>([])
+const stripeLinksLoading = ref(false)
+const orderDetailVisible = ref(false)
+const webhookDetailVisible = ref(false)
 const orderTotal = ref(0)
 const webhookTotal = ref(0)
 const membershipTiers = ref<Array<{ label: string; value: string }>>([])
@@ -151,7 +265,8 @@ const orderStatuses = [
   { label: '已支付', value: 'paid' },
   { label: '失败', value: 'failed' },
   { label: '已取消', value: 'cancelled' },
-  { label: '已过期', value: 'expired' }
+  { label: '已过期', value: 'expired' },
+  { label: '已退款', value: 'refunded' }
 ]
 
 const webhookStatuses = [
@@ -177,7 +292,15 @@ function orderStatusTag(status?: string) {
   if (status === 'paid') return 'success'
   if (status === 'failed' || status === 'cancelled' || status === 'expired') return 'danger'
   if (status === 'checkout_created') return 'warning'
+  if (status === 'refunded') return 'info'
   return 'info'
+}
+
+function paymentStatusTag(status?: string) {
+  if (status === 'succeeded') return 'success'
+  if (status === 'failed') return 'danger'
+  if (status === 'refunded') return 'info'
+  return 'warning'
 }
 
 function webhookStatusTag(status?: string) {
@@ -190,6 +313,19 @@ function webhookStatusTag(status?: string) {
 function formatAmount(amountCents?: number, currency?: string) {
   if (amountCents === undefined || amountCents === null) return '-'
   return `${(amountCents / 100).toFixed(2)} ${currency || ''}`.trim()
+}
+
+function truthy(value?: boolean | number) {
+  return value === true || value === 1
+}
+
+function formatPayload(value?: string) {
+  if (!value) return '-'
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2)
+  } catch {
+    return value
+  }
 }
 
 async function getOrderList() {
@@ -239,6 +375,32 @@ function resetWebhookQuery() {
   void getWebhookList()
 }
 
+async function openOrderDetail(id: string) {
+  orderDetail.value = (await getCupidPaymentOrder(id)).data
+  stripeLinks.value = []
+  orderDetailVisible.value = true
+}
+
+async function loadStripeLinks() {
+  if (!orderDetail.value?.id) return
+  stripeLinksLoading.value = true
+  try {
+    const res = await getCupidPaymentStripeLinks(orderDetail.value.id)
+    stripeLinks.value = res.data?.links || []
+  } finally {
+    stripeLinksLoading.value = false
+  }
+}
+
+function openStripeLink(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
+async function openWebhookDetail(id: string) {
+  webhookDetail.value = (await getCupidPaymentWebhook(id)).data
+  webhookDetailVisible.value = true
+}
+
 function handleTabChange() {
   if (activeTab.value === 'orders') {
     void getOrderList()
@@ -264,5 +426,32 @@ onMounted(async () => {
   margin-top: 4px;
   font-size: 12px;
   color: #909399;
+}
+
+.section-title {
+  margin: 18px 0 10px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.payload-preview {
+  max-height: 420px;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  background: #f8f8f9;
+  color: #303133;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.stripe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
 }
 </style>
