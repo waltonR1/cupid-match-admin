@@ -146,28 +146,34 @@
           <el-descriptions-item label="更新时间">{{ parseTime(orderDetail.updatedAt) || '-' }}</el-descriptions-item>
         </el-descriptions>
 
-        <div v-hasPermi="['cupid:payment:stripe:open']">
-          <div class="section-title">Stripe 操作入口</div>
-          <el-alert
-            title="退款、取消订阅等高风险操作请在 Stripe Dashboard 内完成；本系统通过 webhook 同步结果。"
+        <div class="section-title">平台操作</div>
+        <el-alert
+          title="取消续费与退款会直接调用 Stripe，请确认订单与用户后再操作；后续 webhook 会再次同步最终状态。"
+          type="warning"
+          :closable="false"
+          show-icon
+        />
+        <div class="payment-actions">
+          <el-button
+            v-hasPermi="['cupid:payment:subscription:cancel']"
+            :disabled="!canCancelRenewal(orderDetail)"
+            :loading="cancelRenewalLoading"
             type="warning"
-            :closable="false"
-            show-icon
-          />
-          <div class="stripe-actions">
-            <el-button :loading="stripeLinksLoading" @click="loadStripeLinks">
-              加载 Stripe 跳转
-            </el-button>
-            <el-button
-              v-for="link in stripeLinks"
-              :key="`${link.type}:${link.externalId}`"
-              type="primary"
-              plain
-              @click="openStripeLink(link.url)"
-            >
-              {{ link.label }}
-            </el-button>
-          </div>
+            plain
+            @click="handleCancelRenewal"
+          >
+            取消自动续费
+          </el-button>
+          <el-button
+            v-hasPermi="['cupid:payment:refund']"
+            :disabled="!canRefund(orderDetail)"
+            :loading="refundLoading"
+            type="danger"
+            plain
+            @click="handleRefund"
+          >
+            退款
+          </el-button>
         </div>
 
         <div class="section-title">支付流水</div>
@@ -214,16 +220,17 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseTime } from '@/utils/ruoyi'
 import {
+  cancelCupidPaymentOrderRenewal,
   getCupidPaymentOrder,
-  getCupidPaymentStripeLinks,
   getCupidPaymentWebhook,
   listCupidPaymentOrders,
   listCupidPaymentWebhooks,
+  refundCupidPaymentOrder,
   type CupidPaymentOrderDetail,
   type CupidPaymentOrderItem,
-  type CupidPaymentStripeLink,
   type CupidPaymentWebhookDetail,
   type CupidPaymentWebhookItem
 } from '@/api/cupid/payment'
@@ -236,8 +243,8 @@ const orderRows = ref<CupidPaymentOrderItem[]>([])
 const webhookRows = ref<CupidPaymentWebhookItem[]>([])
 const orderDetail = ref<CupidPaymentOrderDetail>()
 const webhookDetail = ref<CupidPaymentWebhookDetail>()
-const stripeLinks = ref<CupidPaymentStripeLink[]>([])
-const stripeLinksLoading = ref(false)
+const cancelRenewalLoading = ref(false)
+const refundLoading = ref(false)
 const orderDetailVisible = ref(false)
 const webhookDetailVisible = ref(false)
 const orderTotal = ref(0)
@@ -377,23 +384,66 @@ function resetWebhookQuery() {
 
 async function openOrderDetail(id: string) {
   orderDetail.value = (await getCupidPaymentOrder(id)).data
-  stripeLinks.value = []
   orderDetailVisible.value = true
 }
 
-async function loadStripeLinks() {
+function canCancelRenewal(detail?: CupidPaymentOrderDetail) {
+  return Boolean(
+    detail
+    && detail.subscriptionId
+    && detail.localSubscriptionId
+    && !truthy(detail.cancelAtPeriodEnd)
+    && detail.status !== 'refunded'
+  )
+}
+
+function canRefund(detail?: CupidPaymentOrderDetail) {
+  return Boolean(
+    detail
+    && detail.status === 'paid'
+    && (detail.payments || []).some(item => item.status === 'succeeded' && (item.chargeId || item.paymentId))
+  )
+}
+
+async function handleCancelRenewal() {
   if (!orderDetail.value?.id) return
-  stripeLinksLoading.value = true
+  await ElMessageBox.confirm('确认取消该订单对应订阅的自动续费？当前周期权益会保留到周期结束。', '取消自动续费', {
+    confirmButtonText: '确认取消续费',
+    cancelButtonText: '返回',
+    type: 'warning'
+  })
+  cancelRenewalLoading.value = true
   try {
-    const res = await getCupidPaymentStripeLinks(orderDetail.value.id)
-    stripeLinks.value = res.data?.links || []
+    await cancelCupidPaymentOrderRenewal(orderDetail.value.id)
+    ElMessage.success('已取消自动续费')
+    await refreshOrderDetail()
+    await getOrderList()
   } finally {
-    stripeLinksLoading.value = false
+    cancelRenewalLoading.value = false
   }
 }
 
-function openStripeLink(url: string) {
-  window.open(url, '_blank', 'noopener,noreferrer')
+async function handleRefund() {
+  if (!orderDetail.value?.id) return
+  await ElMessageBox.confirm('确认对该订单发起退款？退款会直接提交到 Stripe，不能仅在本系统内撤销。', '确认退款', {
+    confirmButtonText: '确认退款',
+    cancelButtonText: '返回',
+    type: 'warning'
+  })
+  refundLoading.value = true
+  try {
+    await refundCupidPaymentOrder(orderDetail.value.id)
+    ElMessage.success('退款已提交')
+    await refreshOrderDetail()
+    await getOrderList()
+  } finally {
+    refundLoading.value = false
+  }
+}
+
+async function refreshOrderDetail() {
+  if (!orderDetail.value?.id) return
+  orderDetail.value = (await getCupidPaymentOrder(orderDetail.value.id)).data
 }
 
 async function openWebhookDetail(id: string) {
@@ -448,7 +498,7 @@ onMounted(async () => {
   word-break: break-all;
 }
 
-.stripe-actions {
+.payment-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;

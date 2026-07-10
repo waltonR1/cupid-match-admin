@@ -89,15 +89,12 @@ export interface CupidPaymentWebhookDetail extends CupidPaymentWebhookItem {
   updatedAt?: string
 }
 
-export interface CupidPaymentStripeLink {
-  type: string
-  label: string
-  externalId: string
-  url: string
-}
-
-export interface CupidPaymentStripeLinksResult {
-  links: CupidPaymentStripeLink[]
+export interface CupidPaymentActionResult {
+  status: string
+  orderId: string
+  subscriptionId?: string
+  refundId?: string
+  cancelAtPeriodEnd?: boolean
 }
 
 export const listCupidPaymentOrders = (params: CupidPaymentOrderQuery): Promise<TableDataInfo<CupidPaymentOrderItem>> =>
@@ -106,8 +103,11 @@ export const listCupidPaymentOrders = (params: CupidPaymentOrderQuery): Promise<
 export const getCupidPaymentOrder = (id: string): Promise<AjaxResult<CupidPaymentOrderDetail>> =>
   request({ url: `/cupid/payment/orders/${id}`, method: 'get' })
 
-export const getCupidPaymentStripeLinks = (id: string): Promise<AjaxResult<CupidPaymentStripeLinksResult>> =>
-  request({ url: `/cupid/payment/orders/${id}/stripe-links`, method: 'get' })
+export const cancelCupidPaymentOrderRenewal = (id: string): Promise<AjaxResult<CupidPaymentActionResult>> =>
+  request({ url: `/cupid/payment/orders/${id}/cancel-renewal`, method: 'post' })
+
+export const refundCupidPaymentOrder = (id: string): Promise<AjaxResult<CupidPaymentActionResult>> =>
+  request({ url: `/cupid/payment/orders/${id}/refund`, method: 'post' })
 
 export const listCupidPaymentWebhooks = (params: CupidPaymentWebhookQuery): Promise<TableDataInfo<CupidPaymentWebhookItem>> =>
   request({ url: '/cupid/payment/webhooks/list', method: 'get', params })
