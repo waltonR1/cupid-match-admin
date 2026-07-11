@@ -401,7 +401,6 @@ function canRefund(detail?: CupidPaymentOrderDetail) {
   return Boolean(
     detail
     && detail.status === 'paid'
-    && (detail.payments || []).some(item => item.status === 'succeeded' && (item.chargeId || item.paymentId))
   )
 }
 
