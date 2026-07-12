@@ -2,20 +2,22 @@
   <main class="operations-home">
     <header class="workspace-header">
       <div>
-        <p class="eyebrow">OPERATIONS CONSOLE</p>
+        <p class="eyebrow">CUPID MATCH OPERATIONS</p>
         <h1>{{ greeting }}，{{ displayName }}</h1>
-        <p class="workspace-summary">当前工作台仅展示真实的账号与权限状态，业务数据将在对应运营模块完成后接入。</p>
+        <p class="workspace-summary">
+          这里汇总当前后台已经接入的运营能力。日常处理从左侧菜单进入，常用入口可从下方快速打开。
+        </p>
       </div>
       <div class="workspace-identity">
         <span class="identity-label">当前身份</span>
         <strong>{{ primaryRole }}</strong>
-        <span>{{ userStore.name }}</span>
+        <span>{{ userStore.name || '-' }}</span>
       </div>
     </header>
 
-    <section class="metrics-strip" aria-label="当前访问状态">
+    <section class="metrics-strip" aria-label="后台状态">
       <div class="metric-item">
-        <span>已授予角色</span>
+        <span>已授权角色</span>
         <strong>{{ userStore.roles.length }}</strong>
       </div>
       <div class="metric-item">
@@ -50,7 +52,7 @@
               <h3>{{ module.name }}</h3>
               <p>{{ module.scope }}</p>
             </div>
-            <span class="module-state">待接入</span>
+            <el-tag :type="module.tagType" effect="light">{{ module.state }}</el-tag>
           </article>
         </div>
       </div>
@@ -77,7 +79,7 @@
               <el-icon><ArrowRight /></el-icon>
             </button>
           </div>
-          <el-empty v-else :image-size="72" description="当前账号暂无管理入口" />
+          <el-empty v-else :image-size="72" description="当前账号暂无可用快捷入口" />
         </section>
 
         <section class="side-section account-section">
@@ -124,18 +126,23 @@ const userStore = useUserStore()
 const permissionStore = usePermissionStore()
 
 const modules = [
-  { name: '审核中心', scope: 'Profile、Photo 与 Verification', icon: 'clipboard', tone: 'teal' },
-  { name: '关系服务', scope: '私人介绍申请与处理', icon: 'peoples', tone: 'blue' },
-  { name: '活动运营', scope: '活动与报名审核', icon: 'date', tone: 'amber' },
-  { name: '用户服务', scope: 'App 用户与系统通知', icon: 'user', tone: 'coral' },
-  { name: '运营协作', scope: 'Staff Task 与业务审计', icon: 'log', tone: 'slate' }
-]
+  { name: '审核中心', scope: '资料、照片、身份/学历/收入/婚姻认证审核', icon: 'clipboard', tone: 'teal', state: '已接入', tagType: 'success' },
+  { name: '用户服务', scope: 'App 用户、会员、支付订阅、通知发布与联系咨询', icon: 'user', tone: 'blue', state: '已接入', tagType: 'success' },
+  { name: '活动运营', scope: '活动管理、报名审核、活动生命周期自动化', icon: 'date', tone: 'amber', state: '已接入', tagType: 'success' },
+  { name: '关系服务', scope: '私人介绍、跟进事项与顾问协作', icon: 'peoples', tone: 'coral', state: '已接入', tagType: 'success' },
+  { name: '安全与监控', scope: '业务审计、安全事件、业务监控和定时任务', icon: 'lock', tone: 'slate', state: '已接入', tagType: 'success' },
+  { name: '配置中心', scope: '通用选项、法律条款、短信/邮件/支付等部署配置', icon: 'dict', tone: 'violet', state: '需维护', tagType: 'warning' }
+] as const
 
 const actionCandidates: QuickAction[] = [
-  { label: '后台用户', path: '/system/user', icon: 'user', permission: 'system:user:list' },
-  { label: '角色权限', path: '/system/role', icon: 'peoples', permission: 'system:role:list' },
-  { label: '菜单配置', path: '/system/menu', icon: 'tree-table', permission: 'system:menu:list' },
-  { label: '操作日志', path: '/monitor/operlog', icon: 'form', permission: 'monitor:operlog:list' }
+  { label: '联系咨询', path: '/cupid-service/contact-lead', icon: 'message', permission: 'cupid:contactLead:list' },
+  { label: '支付订阅', path: '/cupid-service/payment', icon: 'money', permission: 'cupid:payment:list' },
+  { label: '会员管理', path: '/cupid-service/membership', icon: 'money', permission: 'cupid:membership:list' },
+  { label: '活动管理', path: '/cupid-event/event', icon: 'date', permission: 'cupid:event:list' },
+  { label: '跟进事项', path: '/cupid-operation/task', icon: 'list', permission: 'cupid:staffTask:list' },
+  { label: '法律条款', path: '/cupid-config/legal', icon: 'documentation', permission: 'cupid:legal:list' },
+  { label: '业务监控', path: '/cupid-operation/monitor', icon: 'monitor', permission: 'cupid:monitor:list' },
+  { label: '安全事件', path: '/cupid-operation/security-event', icon: 'lock', permission: 'cupid:security:event:list' }
 ]
 
 const permissionCount = computed(() => userStore.permissions.includes('*:*:*')
@@ -204,7 +211,7 @@ function countVisibleRoutes(routes: any[]): number {
   color: var(--el-color-primary);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0;
+  letter-spacing: 0.16em;
 }
 
 .workspace-summary {
@@ -258,228 +265,167 @@ function countVisibleRoutes(routes: any[]): number {
 
   span {
     color: #c8d0da;
-    font-size: 12px;
+    font-size: 13px;
   }
 
   strong {
-    font-size: 23px;
-    font-weight: 600;
+    font-size: 24px;
   }
 }
 
 .metric-status strong {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
 
   i {
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     background: var(--el-color-success);
-    box-shadow: 0 0 0 4px rgba(103, 194, 58, 0.16);
+    box-shadow: 0 0 0 5px rgba(103, 194, 58, 0.16);
   }
 }
 
 .workspace-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.8fr);
-  gap: 20px;
   max-width: 1440px;
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 24px;
 }
 
 .workspace-main,
 .side-section {
   background: #ffffff;
   border: 1px solid var(--el-border-color-light);
+  box-shadow: 0 10px 30px rgba(48, 65, 86, 0.08);
 }
 
 .workspace-main {
-  padding: 24px;
-}
-
-.workspace-side {
-  display: grid;
-  align-content: start;
-  gap: 20px;
-}
-
-.side-section {
-  padding: 22px;
+  padding: 26px;
 }
 
 .section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
   margin-bottom: 18px;
 
   h2 {
-    margin: 3px 0 0;
-    font-size: 18px;
-    font-weight: 650;
+    margin: 4px 0 0;
+    font-size: 20px;
   }
 
   &.compact {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
   }
 }
 
 .module-list {
-  border-top: 1px solid var(--el-border-color-lighter);
+  display: grid;
+  gap: 12px;
 }
 
 .module-row {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) auto;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
-  min-height: 78px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--el-border-color-lighter);
+  background: #fbfcfe;
+}
 
+.module-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 22px;
+
+  &--teal { background: #1f9d8a; }
+  &--blue { background: #409eff; }
+  &--amber { background: #c08a2a; }
+  &--coral { background: #d56a54; }
+  &--slate { background: #304156; }
+  &--violet { background: #7c5ac2; }
+}
+
+.module-copy {
   h3 {
-    margin: 0 0 4px;
-    font-size: 15px;
+    margin: 0 0 6px;
+    font-size: 16px;
   }
 
   p {
     margin: 0;
     color: var(--el-text-color-secondary);
-    font-size: 12px;
+    font-size: 13px;
   }
 }
 
-.module-icon {
-  width: 36px;
-  height: 36px;
+.workspace-side {
   display: grid;
-  place-items: center;
-  border-radius: 6px;
-  font-size: 18px;
-
-  &--teal { color: var(--el-color-primary); background: var(--el-color-primary-light-9); }
-  &--blue { color: #337ecc; background: #ecf5ff; }
-  &--amber { color: var(--el-color-warning); background: var(--el-color-warning-light-9); }
-  &--coral { color: var(--el-color-danger); background: var(--el-color-danger-light-9); }
-  &--slate { color: var(--el-color-info); background: var(--el-color-info-light-9); }
+  gap: 18px;
+  align-content: start;
 }
 
-.module-state {
-  color: var(--el-text-color-placeholder);
-  font-size: 12px;
+.side-section {
+  padding: 22px;
 }
 
 .quick-actions {
   display: grid;
+  gap: 10px;
 }
 
 .quick-action {
   width: 100%;
   min-height: 48px;
-  padding: 0 4px;
-  border: 0;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  background: transparent;
+  border: 1px solid var(--el-border-color-light);
+  background: #f8fafc;
   color: var(--el-text-color-primary);
   display: grid;
-  grid-template-columns: 24px 1fr 20px;
+  grid-template-columns: 20px minmax(0, 1fr) 16px;
   align-items: center;
   gap: 10px;
+  padding: 0 14px;
   text-align: left;
   cursor: pointer;
 
   &:hover {
     color: var(--el-color-primary);
+    border-color: var(--el-color-primary-light-5);
     background: var(--el-color-primary-light-9);
   }
 }
 
 .account-facts {
   margin: 0;
+  display: grid;
+  gap: 14px;
 
   div {
     display: grid;
-    grid-template-columns: 84px 1fr;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-  }
-
-  div:last-child {
-    border-bottom: 0;
+    gap: 4px;
   }
 
   dt {
-    color: var(--el-text-color-secondary);
+    color: var(--el-text-color-placeholder);
     font-size: 12px;
   }
 
   dd {
     margin: 0;
-    overflow-wrap: anywhere;
-    font-size: 13px;
+    font-weight: 600;
   }
 }
 
-:global(html.dark) {
-  .operations-home {
-    color: var(--el-text-color-primary);
-    background: var(--el-bg-color);
-  }
-
-  .workspace-main,
-  .side-section {
-    background: var(--el-bg-color-overlay);
-    border-color: var(--el-border-color);
-  }
-
-  .workspace-header,
-  .module-list,
-  .module-row,
-  .quick-action,
-  .account-facts div {
-    border-color: var(--el-border-color);
-  }
-}
-
-@media (max-width: 900px) {
-  .operations-home {
-    padding: 18px;
-  }
-
-  .workspace-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .metrics-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .metric-item:nth-child(2) {
-    border-right: 0;
-  }
-
+@media (max-width: 1180px) {
   .workspace-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 520px) {
-  .workspace-header h1 {
-    font-size: 24px;
-  }
-
-  .metrics-strip {
-    grid-template-columns: 1fr;
-  }
-
-  .metric-item {
-    border-right: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
   }
 }
 </style>
