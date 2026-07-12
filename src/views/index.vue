@@ -1,99 +1,62 @@
 <template>
-  <main class="operations-home">
-    <header class="workspace-header">
+  <main class="ops-home">
+    <section class="hero-card">
       <div>
-        <p class="eyebrow">CUPID MATCH OPERATIONS</p>
+        <p class="eyebrow">CUPID MATCH 后台</p>
         <h1>{{ greeting }}，{{ displayName }}</h1>
-        <p class="workspace-summary">
-          这里汇总当前后台已经接入的运营能力。日常处理从左侧菜单进入，常用入口可从下方快速打开。
-        </p>
       </div>
-      <div class="workspace-identity">
-        <span class="identity-label">当前身份</span>
-        <strong>{{ primaryRole }}</strong>
-        <span>{{ userStore.name || '-' }}</span>
-      </div>
-    </header>
-
-    <section class="metrics-strip" aria-label="后台状态">
-      <div class="metric-item">
-        <span>已授权角色</span>
-        <strong>{{ userStore.roles.length }}</strong>
-      </div>
-      <div class="metric-item">
-        <span>权限标识</span>
-        <strong>{{ permissionCount }}</strong>
-      </div>
-      <div class="metric-item">
-        <span>可见导航</span>
-        <strong>{{ navigationCount }}</strong>
-      </div>
-      <div class="metric-item metric-status">
-        <span>后台状态</span>
-        <strong><i></i>正常</strong>
+      <div class="identity-card">
+        <span>当前账号</span>
+        <strong>{{ userStore.name || '-' }}</strong>
+        <small>{{ roleSummary }}</small>
       </div>
     </section>
 
-    <section class="workspace-grid">
-      <div class="workspace-main">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">WORKSPACE</p>
-            <h2>业务工作区</h2>
-          </div>
+    <section class="workspace-layout">
+      <div class="workbench-panel">
+        <div class="section-title">
+          <p class="eyebrow">WORKSPACE</p>
+          <h2>常用工作区</h2>
         </div>
 
-        <div class="module-list">
-          <article v-for="module in modules" :key="module.name" class="module-row">
-            <div class="module-icon" :class="`module-icon--${module.tone}`">
-              <svg-icon :icon-class="module.icon" />
+        <div class="module-grid">
+          <article v-for="group in visibleGroups" :key="group.title" class="module-card">
+            <div class="module-head">
+              <div class="module-icon" :class="`module-icon--${group.tone}`">
+                <svg-icon :icon-class="group.icon" />
+              </div>
+              <div>
+                <h3>{{ group.title }}</h3>
+                <p>{{ group.description }}</p>
+              </div>
             </div>
-            <div class="module-copy">
-              <h3>{{ module.name }}</h3>
-              <p>{{ module.scope }}</p>
+
+            <div class="action-list">
+              <button
+                v-for="action in group.actions"
+                :key="action.path"
+                type="button"
+                class="action-item"
+                @click="router.push(action.path)"
+              >
+                <span>{{ action.label }}</span>
+                <el-tag v-if="action.note" size="small" :type="action.noteType || 'info'" effect="light">
+                  {{ action.note }}
+                </el-tag>
+                <el-icon><ArrowRight /></el-icon>
+              </button>
             </div>
-            <el-tag :type="module.tagType" effect="light">{{ module.state }}</el-tag>
           </article>
         </div>
       </div>
 
-      <aside class="workspace-side">
-        <section class="side-section">
-          <div class="section-heading compact">
-            <div>
-              <p class="section-kicker">ACCESS</p>
-              <h2>快捷入口</h2>
-            </div>
+      <aside class="side-panel">
+        <section class="side-card">
+          <div class="section-title compact">
+            <p class="eyebrow">ACCOUNT</p>
+            <h2>权限概览</h2>
           </div>
-
-          <div v-if="quickActions.length" class="quick-actions">
-            <button
-              v-for="action in quickActions"
-              :key="action.path"
-              type="button"
-              class="quick-action"
-              @click="router.push(action.path)"
-            >
-              <svg-icon :icon-class="action.icon" />
-              <span>{{ action.label }}</span>
-              <el-icon><ArrowRight /></el-icon>
-            </button>
-          </div>
-          <el-empty v-else :image-size="72" description="当前账号暂无可用快捷入口" />
-        </section>
-
-        <section class="side-section account-section">
-          <div class="section-heading compact">
-            <div>
-              <p class="section-kicker">ACCOUNT</p>
-              <h2>权限概览</h2>
-            </div>
-          </div>
-          <dl class="account-facts">
-            <div>
-              <dt>登录账号</dt>
-              <dd>{{ userStore.name || '-' }}</dd>
-            </div>
+          <dl class="facts">
             <div>
               <dt>显示名称</dt>
               <dd>{{ displayName }}</dd>
@@ -101,6 +64,10 @@
             <div>
               <dt>角色</dt>
               <dd>{{ roleSummary }}</dd>
+            </div>
+            <div>
+              <dt>可用工作组</dt>
+              <dd>{{ visibleGroups.length }} / {{ actionGroups.length }}</dd>
             </div>
           </dl>
         </section>
@@ -111,48 +78,113 @@
 
 <script setup lang="ts" name="Index">
 import { ArrowRight } from '@element-plus/icons-vue'
-import usePermissionStore from '@/store/modules/permission'
 import useUserStore from '@/store/modules/user'
 
 interface QuickAction {
   label: string
   path: string
-  icon: string
   permission: string
+  note?: string
+  noteType?: 'success' | 'warning' | 'info' | 'danger'
+}
+
+interface ActionGroup {
+  title: string
+  description: string
+  icon: string
+  tone: string
+  actions: QuickAction[]
 }
 
 const router = useRouter()
 const userStore = useUserStore()
-const permissionStore = usePermissionStore()
 
-const modules = [
-  { name: '审核中心', scope: '资料、照片、身份/学历/收入/婚姻认证审核', icon: 'clipboard', tone: 'teal', state: '已接入', tagType: 'success' },
-  { name: '用户服务', scope: 'App 用户、会员、支付订阅、通知发布与联系咨询', icon: 'user', tone: 'blue', state: '已接入', tagType: 'success' },
-  { name: '活动运营', scope: '活动管理、报名审核、活动生命周期自动化', icon: 'date', tone: 'amber', state: '已接入', tagType: 'success' },
-  { name: '关系服务', scope: '私人介绍、跟进事项与顾问协作', icon: 'peoples', tone: 'coral', state: '已接入', tagType: 'success' },
-  { name: '安全与监控', scope: '业务审计、安全事件、业务监控和定时任务', icon: 'lock', tone: 'slate', state: '已接入', tagType: 'success' },
-  { name: '配置中心', scope: '通用选项、法律条款、短信/邮件/支付等部署配置', icon: 'dict', tone: 'violet', state: '需维护', tagType: 'warning' }
-] as const
-
-const actionCandidates: QuickAction[] = [
-  { label: '联系咨询', path: '/cupid-service/contact-lead', icon: 'message', permission: 'cupid:contactLead:list' },
-  { label: '支付订阅', path: '/cupid-service/payment', icon: 'money', permission: 'cupid:payment:list' },
-  { label: '会员管理', path: '/cupid-service/membership', icon: 'money', permission: 'cupid:membership:list' },
-  { label: '活动管理', path: '/cupid-event/event', icon: 'date', permission: 'cupid:event:list' },
-  { label: '跟进事项', path: '/cupid-operation/task', icon: 'list', permission: 'cupid:staffTask:list' },
-  { label: '法律条款', path: '/cupid-config/legal', icon: 'documentation', permission: 'cupid:legal:list' },
-  { label: '业务监控', path: '/cupid-operation/monitor', icon: 'monitor', permission: 'cupid:monitor:list' },
-  { label: '安全事件', path: '/cupid-operation/security-event', icon: 'lock', permission: 'cupid:security:event:list' }
+const actionGroups: ActionGroup[] = [
+  {
+    title: '审核中心',
+    description: '资料、照片、身份与资质材料审核。',
+    icon: 'clipboard',
+    tone: 'teal',
+    actions: [
+      { label: '资料审核', path: '/cupid/profile', permission: 'cupid:profile:list' },
+      { label: '照片审核', path: '/cupid/photo', permission: 'cupid:photo:list' },
+      { label: '身份认证审核', path: '/cupid/verification/identity', permission: 'cupid:verification:identity:list' },
+      { label: '学历认证审核', path: '/cupid/verification/education', permission: 'cupid:verification:education:list' },
+      { label: '收入认证审核', path: '/cupid/verification/income', permission: 'cupid:verification:income:list' },
+      { label: '婚姻认证审核', path: '/cupid/verification/marital', permission: 'cupid:verification:marital:list' }
+    ]
+  },
+  {
+    title: '资料中心',
+    description: '查看资料库，维护运营字段和内部备注。',
+    icon: 'list',
+    tone: 'green',
+    actions: [
+      { label: '资料库', path: '/profile-center/library', permission: 'cupid:profileLibrary:list' },
+      { label: '资料运营', path: '/profile-center/manage', permission: 'cupid:profileManage:list' }
+    ]
+  },
+  {
+    title: '用户服务',
+    description: '用户、会员、支付、通知和联系咨询。',
+    icon: 'user',
+    tone: 'blue',
+    actions: [
+      { label: 'App 用户管理', path: '/cupid-service/user', permission: 'cupid:user:list' },
+      { label: '会员管理', path: '/cupid-service/membership', permission: 'cupid:membership:list' },
+      { label: '支付订阅', path: '/cupid-service/payment', permission: 'cupid:payment:list', note: 'Stripe' },
+      { label: '通知发布', path: '/cupid-service/inbox', permission: 'cupid:inbox:send' },
+      { label: '通知模板', path: '/cupid-service/inbox-template', permission: 'cupid:inboxTemplate:list' },
+      { label: '联系咨询', path: '/cupid-service/contact-lead', permission: 'cupid:contactLead:list' }
+    ]
+  },
+  {
+    title: '活动运营',
+    description: '活动发布、报名审核和活动生命周期维护。',
+    icon: 'date',
+    tone: 'amber',
+    actions: [
+      { label: '活动管理', path: '/cupid-event/event', permission: 'cupid:event:list' },
+      { label: '活动报名', path: '/cupid-event/registration', permission: 'cupid:eventRegistration:list' }
+    ]
+  },
+  {
+    title: '关系服务',
+    description: '私人介绍、跟进事项和顾问协作。',
+    icon: 'peoples',
+    tone: 'coral',
+    actions: [
+      { label: '私人介绍', path: '/relationship-service/introduction', permission: 'cupid:introduction:list' },
+      { label: '跟进事项', path: '/cupid-operation/task', permission: 'cupid:staffTask:list' }
+    ]
+  },
+  {
+    title: '安全与监控',
+    description: '业务审计、安全事件、运行监控和定时任务。',
+    icon: 'lock',
+    tone: 'slate',
+    actions: [
+      { label: '业务审计', path: '/cupid-operation/audit', permission: 'cupid:audit:list' },
+      { label: '安全事件', path: '/cupid-operation/security-event', permission: 'cupid:security:event:list' },
+      { label: '业务监控', path: '/cupid-operation/monitor', permission: 'cupid:monitor:list' },
+      { label: '定时任务', path: '/monitor/job', permission: 'monitor:job:list' }
+    ]
+  },
+  {
+    title: '配置中心',
+    description: '通用选项、法律条款和外部服务配置说明。',
+    icon: 'dict',
+    tone: 'violet',
+    actions: [
+      { label: '通用选项', path: '/cupid-config/options', permission: 'cupid:options:list' },
+      { label: '法律条款', path: '/cupid-config/legal', permission: 'cupid:legal:list' },
+      { label: '系统配置', path: '/system/config', permission: 'system:config:list' }
+    ]
+  }
 ]
 
-const permissionCount = computed(() => userStore.permissions.includes('*:*:*')
-  ? '全部'
-  : userStore.permissions.length)
-
-const navigationCount = computed(() => countVisibleRoutes(permissionStore.sidebarRouters))
 const displayName = computed(() => userStore.nickName || userStore.name || '运营人员')
 const roleSummary = computed(() => userStore.roles.length ? userStore.roles.join('、') : '默认角色')
-const primaryRole = computed(() => userStore.roles.includes('admin') ? '平台管理员' : roleSummary.value)
 const greeting = computed(() => {
   const hour = new Date().getHours()
   if (hour < 6) return '夜深了'
@@ -161,52 +193,56 @@ const greeting = computed(() => {
   return '晚上好'
 })
 
-const quickActions = computed(() => actionCandidates.filter((action) =>
-  userStore.permissions.includes('*:*:*') || userStore.permissions.includes(action.permission)
-))
+const visibleGroups = computed(() => actionGroups
+  .map((group) => ({
+    ...group,
+    actions: group.actions.filter((action) => hasPermission(action.permission))
+  }))
+  .filter((group) => group.actions.length > 0))
 
-function countVisibleRoutes(routes: any[]): number {
-  return routes.reduce((count, route) => {
-    const current = route.hidden ? 0 : 1
-    const children = Array.isArray(route.children) ? countVisibleRoutes(route.children) : 0
-    return count + current + children
-  }, 0)
+function hasPermission(permission: string) {
+  return userStore.permissions.includes('*:*:*') || userStore.permissions.includes(permission)
 }
 </script>
 
 <style scoped lang="scss">
-.operations-home {
+.ops-home {
   min-height: calc(100vh - 84px);
   padding: 28px;
   color: var(--el-text-color-primary);
-  background:
-    linear-gradient(rgba(64, 158, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(64, 158, 255, 0.035) 1px, transparent 1px),
-    #f0f2f5;
-  background-size: 32px 32px;
+  background: #f0f2f5;
 }
 
-.workspace-header {
+.hero-card,
+.workbench-panel,
+.side-card {
+  border: 1px solid var(--el-border-color-light);
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(48, 65, 86, 0.08);
+}
+
+.hero-card {
+  max-width: 1440px;
+  margin: 0 auto 18px;
+  padding: 28px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
-  max-width: 1440px;
-  margin: 0 auto 24px;
-  padding: 8px 0 22px;
-  border-bottom: 1px solid var(--el-border-color);
+  background:
+    linear-gradient(135deg, rgba(48, 65, 86, 0.96), rgba(64, 158, 255, 0.76)),
+    #304156;
+  color: #fff;
 
   h1 {
-    margin: 4px 0 8px;
+    margin: 6px 0 10px;
     font-size: 30px;
     line-height: 1.25;
     font-weight: 650;
-    letter-spacing: 0;
   }
 }
 
-.eyebrow,
-.section-kicker {
+.eyebrow {
   margin: 0;
   color: var(--el-color-primary);
   font-size: 11px;
@@ -214,102 +250,42 @@ function countVisibleRoutes(routes: any[]): number {
   letter-spacing: 0.16em;
 }
 
-.workspace-summary {
-  margin: 0;
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
+.hero-card .eyebrow {
+  color: rgba(255, 255, 255, 0.72);
 }
 
-.workspace-identity {
-  min-width: 180px;
-  padding-left: 18px;
-  border-left: 3px solid var(--el-color-primary);
+.identity-card {
+  min-width: 220px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
   display: grid;
-  gap: 3px;
+  gap: 6px;
 
-  strong {
-    font-size: 16px;
-  }
-
-  span:last-child {
-    color: var(--el-text-color-secondary);
-    font-size: 12px;
-  }
-}
-
-.identity-label {
-  color: var(--el-text-color-placeholder);
-  font-size: 11px;
-}
-
-.metrics-strip {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  max-width: 1440px;
-  margin: 0 auto 24px;
-  background: #304156;
-  color: #ffffff;
-}
-
-.metric-item {
-  min-height: 88px;
-  padding: 18px 22px;
-  border-right: 1px solid rgba(255, 255, 255, 0.14);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  &:last-child {
-    border-right: 0;
-  }
-
-  span {
-    color: #c8d0da;
-    font-size: 13px;
+  span,
+  small {
+    color: rgba(255, 255, 255, 0.72);
   }
 
   strong {
-    font-size: 24px;
+    font-size: 20px;
   }
 }
 
-.metric-status strong {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-
-  i {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--el-color-success);
-    box-shadow: 0 0 0 5px rgba(103, 194, 58, 0.16);
-  }
-}
-
-.workspace-grid {
+.workspace-layout {
   max-width: 1440px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   gap: 24px;
 }
 
-.workspace-main,
-.side-section {
-  background: #ffffff;
-  border: 1px solid var(--el-border-color-light);
-  box-shadow: 0 10px 30px rgba(48, 65, 86, 0.08);
+.workbench-panel,
+.side-card {
+  padding: 24px;
 }
 
-.workspace-main {
-  padding: 26px;
-}
-
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.section-title {
   margin-bottom: 18px;
 
   h2 {
@@ -322,30 +298,49 @@ function countVisibleRoutes(routes: any[]): number {
   }
 }
 
-.module-list {
+.module-grid {
   display: grid;
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
-.module-row {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 16px;
-  padding: 18px;
+.module-card {
   border: 1px solid var(--el-border-color-lighter);
   background: #fbfcfe;
+  padding: 18px;
+}
+
+.module-head {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--el-text-color-secondary);
+    font-size: 13px;
+    line-height: 1.6;
+  }
 }
 
 .module-icon {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
-  color: #ffffff;
-  font-size: 22px;
+  color: #fff;
+  font-size: 21px;
 
   &--teal { background: #1f9d8a; }
+  &--green { background: #4f9d69; }
   &--blue { background: #409eff; }
   &--amber { background: #c08a2a; }
   &--coral { background: #d56a54; }
@@ -353,45 +348,21 @@ function countVisibleRoutes(routes: any[]): number {
   &--violet { background: #7c5ac2; }
 }
 
-.module-copy {
-  h3 {
-    margin: 0 0 6px;
-    font-size: 16px;
-  }
-
-  p {
-    margin: 0;
-    color: var(--el-text-color-secondary);
-    font-size: 13px;
-  }
-}
-
-.workspace-side {
+.action-list {
   display: grid;
-  gap: 18px;
-  align-content: start;
+  gap: 8px;
 }
 
-.side-section {
-  padding: 22px;
-}
-
-.quick-actions {
-  display: grid;
-  gap: 10px;
-}
-
-.quick-action {
-  width: 100%;
-  min-height: 48px;
+.action-item {
+  min-height: 42px;
   border: 1px solid var(--el-border-color-light);
-  background: #f8fafc;
+  background: #fff;
   color: var(--el-text-color-primary);
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr) 16px;
+  grid-template-columns: minmax(0, 1fr) auto 16px;
   align-items: center;
   gap: 10px;
-  padding: 0 14px;
+  padding: 0 12px;
   text-align: left;
   cursor: pointer;
 
@@ -402,7 +373,13 @@ function countVisibleRoutes(routes: any[]): number {
   }
 }
 
-.account-facts {
+.side-panel {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.facts {
   margin: 0;
   display: grid;
   gap: 14px;
@@ -424,7 +401,8 @@ function countVisibleRoutes(routes: any[]): number {
 }
 
 @media (max-width: 1180px) {
-  .workspace-grid {
+  .workspace-layout,
+  .module-grid {
     grid-template-columns: 1fr;
   }
 }
