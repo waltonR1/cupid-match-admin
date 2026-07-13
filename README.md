@@ -88,6 +88,10 @@ npm run build:prod
 npm run preview
 ```
 
+## 生产部署
+
+Cloudflare Pages 构建命令、Render API 环境变量、SPA 路由回退和上线验证见 [docs/deployment.md](./docs/deployment.md)。
+
 ## 主要业务模块
 
 - App 用户管理
