@@ -14,7 +14,7 @@ Cupid Match 管理后台作为静态 Vue 3 应用部署到 Cloudflare Pages，AP
 | Build output directory | `dist` |
 | Root directory | 留空 |
 
-Node.js 建议使用当前 LTS 版本。`public/_redirects` 会被复制到构建产物，使 Vue Router history 路由刷新时回退到 `index.html`。
+Node.js 建议使用当前 LTS 版本。项目不要提供顶层 `404.html` 或将 `/*` 重写到 `index.html` 的 `_redirects`：Cloudflare Pages 会对没有顶层 `404.html` 的项目自动启用 SPA 回退，手写该重写会被判定为循环。
 
 ## 生产环境变量
 
