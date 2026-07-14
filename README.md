@@ -2,6 +2,16 @@
 
 Cupid Match Admin 是 Cupid Match 的后台运营端，基于 RuoYi-Vue3 / Vue 3 / TypeScript / Element Plus 改造，用于平台管理、用户服务、审核、会员、支付、活动、通知、配置和运营协作。
 
+## 关联仓库
+
+| 仓库 | 职责 | 生产平台 |
+| --- | --- | --- |
+| [cupid-match-server](https://github.com/waltonR1/cupid-match-server) | Java API、认证、支付、存储与后台任务 | Render |
+| [cupid-match](https://github.com/waltonR1/cupid-match) | C 端 uni-app / Vue H5 | Cloudflare Pages |
+| [cupid-match-admin](https://github.com/waltonR1/cupid-match-admin) | 当前仓库，Vue 3 运营后台 | Cloudflare Pages |
+
+三仓统一部署说明见 [cupid-match-server/doc/cm-production-deployment.md](https://github.com/waltonR1/cupid-match-server/blob/master/doc/cm-production-deployment.md)。
+
 ## 技术栈
 
 - Vue 3
@@ -90,7 +100,7 @@ npm run preview
 
 ## 生产部署
 
-Cloudflare Pages 构建命令、Render API 环境变量、SPA 路由回退和上线验证见 [docs/deployment.md](./docs/deployment.md)。
+Cloudflare Pages 构建细节见 [docs/deployment.md](./docs/deployment.md)；完整发布顺序、后端、R2 和 Stripe 配置以 [三仓生产部署](https://github.com/waltonR1/cupid-match-server/blob/master/doc/cm-production-deployment.md) 为准。
 
 ## 主要业务模块
 

@@ -2,6 +2,8 @@
 
 Cupid Match 管理后台作为静态 Vue 3 应用部署到 Cloudflare Pages，API 由 Render 上的 `cupid-match-server` 提供。
 
+本文只记录管理后台特有的 Pages 构建配置。三仓发布顺序、后端环境变量、R2 和 Stripe 配置统一见 [server 仓库生产部署手册](https://github.com/waltonR1/cupid-match-server/blob/master/doc/cm-production-deployment.md)。
+
 ## Pages 配置
 
 | 配置项 | 值 |
